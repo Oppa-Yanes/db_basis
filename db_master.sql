@@ -124,6 +124,24 @@ CREATE TABLE m_tph (
     CONSTRAINT fk_block FOREIGN KEY (block_id) REFERENCES m_block(id)    
 );
 
+CREATE TABLE m_department (
+    id SERIAL PRIMARY KEY,
+    code VARCHAR,
+    name VARCHAR NOT NULL,
+    complete_name VARCHAR NOT NULL,
+    operating_unit_id INT4,
+    company_id INT4 NOT NULL,
+    parent_id INT4,
+    is_disabled BOOLEAN DEFAULT FALSE,
+    create_by VARCHAR,
+    create_date TIMESTAMP,
+    write_by VARCHAR,
+    write_date TIMESTAMP,
+    
+    CONSTRAINT fk_operating_unit FOREIGN KEY (operating_unit_id) REFERENCES m_operating_unit(id),
+    CONSTRAINT fk_company FOREIGN KEY (company_id) REFERENCES m_company(id),
+    CONSTRAINT fk_parent_id FOREIGN KEY (parent_id) REFERENCES m_department(id)
+);
 
 
 -- CREATE ACCESS TO ODOO DB
@@ -324,5 +342,32 @@ SET
     write_by = EXCLUDED.write_by,
     write_date = EXCLUDED.write_date
 ;
+
+-- department
+UPDATE m_department SET is_disabled = TRUE;
+INSERT INTO m_department (id, code, name, complete_name, operating_unit_id, company_id, parent_id, is_disabled, create_by, create_date, write_by, write_date)
+SELECT a.id, NULL, a.name, a.complete_name, b.operating_unit_id, a.company_id, a.parent_id, FALSE, x.login, a.create_date, y.login, a.write_date
+FROM
+    hr_department a
+    LEFT JOIN plantation_division b ON b.id = a.division_id
+    LEFT JOIN res_users x ON x.id = a.create_uid
+    LEFT JOIN res_users y ON y.id = a.write_uid
+WHERE a.active
+ON CONFLICT (id) DO UPDATE
+SET
+    code = EXCLUDED.code,
+    name = EXCLUDED.name,
+    complete_name = EXCLUDED.complete_name,
+    operating_unit_id = EXCLUDED.operating_unit_id,
+    company_id = EXCLUDED.company_id,
+    parent_id = EXCLUDED.parent_id,
+    is_disabled = FALSE,
+    create_by = EXCLUDED.create_by,
+    create_date = EXCLUDED.create_date,
+    write_by = EXCLUDED.write_by,
+    write_date = EXCLUDED.write_date
+;
+
+
 
 
