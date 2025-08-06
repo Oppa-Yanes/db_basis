@@ -29,6 +29,7 @@ INTO public;
 CREATE TABLE m_company (
     id SERIAL PRIMARY KEY,
     code VARCHAR NOT NULL UNIQUE,
+    init VARCHAR,
     name VARCHAR NOT NULL,
     is_disabled BOOLEAN DEFAULT FALSE,
     create_by VARCHAR,
@@ -39,8 +40,8 @@ CREATE TABLE m_company (
 
 -- insert into m_company
 UPDATE m_company SET is_disabled = TRUE;
-INSERT INTO m_company (id, code, name, is_disabled, create_by, create_date, write_by, write_date)
-SELECT a.id, a.code, a.name, FALSE, x.login, a.create_date, y.login, a.write_date
+INSERT INTO m_company (id, code, name, init, is_disabled, create_by, create_date, write_by, write_date)
+SELECT a.id, a.code, a.name, NULL, FALSE, x.login, a.create_date, y.login, a.write_date
 FROM
     res_company a
     LEFT JOIN res_users x ON x.id = a.create_uid
@@ -49,12 +50,13 @@ ON CONFLICT (id) DO UPDATE
 SET
     code = EXCLUDED.code,
     name = EXCLUDED.name,
+    init = EXCLUDED.init,
     is_disabled = FALSE,
     create_by = EXCLUDED.create_by,
     create_date = EXCLUDED.create_date,
     write_by = EXCLUDED.write_by,
     write_date = EXCLUDED.write_date
 ;
-UPDATE m_company SET code = 'GBS' WHERE id = 1;
-UPDATE m_company SET code = 'LKK' WHERE id = 2;
+UPDATE m_company SET init = 'GBS' WHERE id = 1;
+UPDATE m_company SET init = 'LKK' WHERE id = 2;
 
