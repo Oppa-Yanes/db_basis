@@ -75,3 +75,24 @@ SET
 UPDATE m_company SET init = 'GBS' WHERE id = 1;
 UPDATE m_company SET init = 'LKK' WHERE id = 2;
 
+-- insert into m_operating_unit
+UPDATE m_operating_unit SET is_disabled = TRUE;
+INSERT INTO m_operating_unit (id, code, name, company_id, is_disabled, create_by, create_date, write_by, write_date)
+SELECT a.id, a.code, a.name, a.company_id, FALSE, x.login, a.create_date, y.login, a.write_date
+FROM
+    operating_unit a
+    LEFT JOIN res_users x ON x.id = a.create_uid
+    LEFT JOIN res_users y ON y.id = a.write_uid
+WHERE a.active
+ON CONFLICT (id) DO UPDATE
+SET
+    code = EXCLUDED.code,
+    name = EXCLUDED.name,
+    company_id = EXCLUDED.company_id,
+    is_disabled = FALSE,
+    create_by = EXCLUDED.create_by,
+    create_date = EXCLUDED.create_date,
+    write_by = EXCLUDED.write_by,
+    write_date = EXCLUDED.write_date
+;
+
