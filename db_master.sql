@@ -161,6 +161,7 @@ CREATE TABLE m_employee (
 	type_name VARCHAR NOT NULL,
 	status_id INT4 NOT NULL,
 	job_status VARCHAR NOT NULL,
+	fp_id INT4,
 	gender VARCHAR,
 	birthday DATE,
 	id_number VARCHAR,
@@ -441,7 +442,7 @@ SET
 UPDATE m_employee SET is_disabled = TRUE;
 INSERT INTO m_employee (
 	id, nip, name, operating_unit_id, company_id, estate_id, division_id, department_id, foreman_group_id, foreman_id, job_level_id, job_level,
-	job_id, job_name, type_id, type_name, status_id, job_status, gender, birthday, id_number, work_date_start, work_duration,
+	job_id, job_name, type_id, type_name, status_id, job_status, fp_id, gender, birthday, id_number, work_date_start, work_duration,
 	contract_start, contract_end, contract_state, hr_transition,
 	is_disabled, create_by, create_date, write_by, write_date
 )
@@ -464,6 +465,7 @@ SELECT
 	typ.name AS employee_type,
 	emp.employee_status_id AS status_id,
 	sts.name AS job_status,
+	emp.fp_id_emp,
 	emp.gender,
 	emp.birthday,
 	emp.identification_id AS id_number,
@@ -509,6 +511,7 @@ SET
 	type_name        = EXCLUDED.type_name,
 	status_id        = EXCLUDED.status_id,
 	job_status       = EXCLUDED.job_status,
+	fp_id			 = EXCLUDED.fp_id,
 	gender           = EXCLUDED.gender,
 	birthday         = EXCLUDED.birthday,
 	id_number        = EXCLUDED.id_number,
