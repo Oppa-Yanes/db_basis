@@ -86,7 +86,7 @@ CREATE TABLE m_block (
     operating_unit_id INT4 NOT NULL,
     company_id INT4 NOT NULL,
     estate_id INT4 NOT NULL,
-    afdeling_id INT4,
+    afdeling_id INT4 NOT NULL,
     is_disabled BOOLEAN DEFAULT FALSE,
     create_by VARCHAR,
     create_date TIMESTAMP,
