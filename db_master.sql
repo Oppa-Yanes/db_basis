@@ -38,6 +38,21 @@ CREATE TABLE m_company (
     write_date TIMESTAMP
 );
 
+CREATE TABLE m_operating_unit (
+    id SERIAL PRIMARY KEY,
+    code VARCHAR NOT NULL UNIQUE,
+    name VARCHAR NOT NULL,
+    company_id INT4 NOT NULL,
+    is_disabled BOOLEAN DEFAULT FALSE,
+    create_by VARCHAR,
+    create_date TIMESTAMP,
+    write_by VARCHAR,
+    write_date TIMESTAMP,
+    
+    CONSTRAINT fk_company FOREIGN KEY (company_id) REFERENCES m_company(id)
+);
+
+
 -- insert into m_company
 UPDATE m_company SET is_disabled = TRUE;
 INSERT INTO m_company (id, code, name, init, is_disabled, create_by, create_date, write_by, write_date)
