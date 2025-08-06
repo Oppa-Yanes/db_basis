@@ -48,20 +48,20 @@ CREATE TABLE m_afdeling (
     code VARCHAR NOT NULL UNIQUE,
     name VARCHAR NOT NULL,
     mark VARCHAR,
-    parent_id INT4,
     operating_unit_id INT4 NOT NULL,
     company_id INT4 NOT NULL,
     estate_id INT4 NOT NULL,
+    parent_id INT4,
     is_disabled BOOLEAN DEFAULT FALSE,
     create_by VARCHAR,
     create_date TIMESTAMP,
     write_by VARCHAR,
     write_date TIMESTAMP,
     
-    CONSTRAINT fk_parent_id FOREIGN KEY (parent_id) REFERENCES m_division(id),
     CONSTRAINT fk_operating_unit FOREIGN KEY (operating_unit_id) REFERENCES m_operating_unit(id),
     CONSTRAINT fk_company FOREIGN KEY (company_id) REFERENCES m_company(id),
-    CONSTRAINT fk_estate FOREIGN KEY (estate_id) REFERENCES m_estate(id)
+    CONSTRAINT fk_estate FOREIGN KEY (estate_id) REFERENCES m_estate(id),
+    CONSTRAINT fk_parent_id FOREIGN KEY (parent_id) REFERENCES m_afdeling(id)
 );
 
 CREATE TABLE m_block (
