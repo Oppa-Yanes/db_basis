@@ -99,7 +99,6 @@ CREATE TABLE m_block (
     CONSTRAINT fk_afdeling FOREIGN KEY (afdeling_id) REFERENCES m_afdeling(id)
 );
 
-DROP TABLE IF EXISTS m_tph;
 CREATE TABLE m_tph (
     id SERIAL PRIMARY KEY,
     code VARCHAR NOT NULL,
