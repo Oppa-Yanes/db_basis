@@ -28,14 +28,32 @@ INTO public;
 
 CREATE TABLE m_company (
     id SERIAL PRIMARY KEY,
-    code VARCHAR,
-    name VARCHAR NOT NULL UNIQUE,
-    email VARCHAR,
-    phone VARCHAR,
-    create_uid INT,
+    code VARCHAR NOT NULL UNIQUE,
+    name VARCHAR NOT NULL,
+    is_disabled BOOLEAN DEFAULT FALSE,
+    create_by VARCHAR,
     create_date TIMESTAMP,
-    write_uid INT,
+    write_by VARCHAR,
     write_date TIMESTAMP
 );
+
+-- insert into m_company
+UPDATE m_company SET is_disabled = TRUE;
+INSERT INTO m_company (id, code, name, is_disabled, create_by, create_date, write_by, write_date)
+SELECT a.id, a.code, a.name, FALSE, x.login, a.create_date, y.login, a.write_date
+FROM
+    res_company a
+    LEFT JOIN res_users x ON x.id = a.create_uid
+    LEFT JOIN res_users y ON y.id = a.write_uid
+ON CONFLICT (id) DO UPDATE
+SET
+    code = EXCLUDED.code,
+    name = EXCLUDED.name,
+    is_disabled = FALSE,
+    create_by = EXCLUDED.create_by,
+    create_date = EXCLUDED.create_date,
+    write_by = EXCLUDED.write_by,
+    write_date = EXCLUDED.write_date
+;
 
 
