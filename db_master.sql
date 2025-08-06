@@ -197,7 +197,7 @@ SET
 -- afdeling
 UPDATE m_afdeling SET is_disabled = TRUE;
 INSERT INTO m_afdeling (id, code, name, mark, parent_id, operating_unit_id, company_id, estate_id, is_disabled, create_by, create_date, write_by, write_date)
-SELECT a.id, a.code, a.name, a.mark, a.parent_id, a.operating_unit_id, a.company_id, a.estate_id, FALSE, x.login, a.create_date, y.login, a.write_date
+SELECT a.id, a.code, a.name, a.mark, a.parent_division_id, a.operating_unit_id, a.company_id, a.estate_id, FALSE, x.login, a.create_date, y.login, a.write_date
 FROM
     plantation_division a
     LEFT JOIN res_users x ON x.id = a.create_uid
