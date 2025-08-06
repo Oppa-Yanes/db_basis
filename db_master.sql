@@ -64,6 +64,40 @@ CREATE TABLE m_division (
     CONSTRAINT fk_estate FOREIGN KEY (estate_id) REFERENCES m_estate(id)
 );
 
+CREATE TABLE m_block (
+    id SERIAL PRIMARY KEY,
+    code VARCHAR NOT NULL UNIQUE,
+    code2 VARCHAR NOT NULL,
+    name VARCHAR NOT NULL,
+    topograph VARCHAR,
+    soil VARCHAR,
+    is_plasma BOOLEAN DEFAULT FALSE,
+    plasma_owner VARCHAR,
+    area_coefficient FLOAT8,
+    block_area FLOAT8,
+    planted_area FLOAT8,
+    plant_total INT4,
+    maturate_time INT4,
+    planted_date DATE,
+    mature_date DATE,
+    mature_age INT4,
+    immature_age INT4,
+    is_dummmy BOOLEAN DEFAULT FALSE,    
+    operating_unit_id INT4 NOT NULL,
+    company_id INT4 NOT NULL,
+    estate_id INT4 NOT NULL,
+    division_id INT4,
+    is_disabled BOOLEAN DEFAULT FALSE,
+    create_by VARCHAR,
+    create_date TIMESTAMP,
+    write_by VARCHAR,
+    write_date TIMESTAMP,
+    
+    CONSTRAINT fk_operating_unit FOREIGN KEY (operating_unit_id) REFERENCES m_operating_unit(id),
+    CONSTRAINT fk_company FOREIGN KEY (company_id) REFERENCES m_company(id),
+    CONSTRAINT fk_estate FOREIGN KEY (estate_id) REFERENCES m_estate(id),
+    CONSTRAINT fk_division FOREIGN KEY (division_id) REFERENCES m_division(id)
+);
 
 
 -- CREATE ACCESS TO ODOO DB
@@ -184,3 +218,55 @@ SET
     write_by = EXCLUDED.write_by,
     write_date = EXCLUDED.write_date
 ;
+
+-- block
+UPDATE m_block SET is_disabled = TRUE;
+INSERT INTO m_block (
+	id,code,code2,name,topograph,soil,is_plasma,plasma_owner,area_coefficient,block_area,planted_area,
+	plant_total,maturate_time,planted_date,mature_date,mature_age,immature_age,is_dummmy,operating_unit_id,
+	company_id,estate_id,division_id,is_disabled,create_by,create_date,write_by,write_date
+)
+SELECT 
+	a.id, a.code, b.code, a.name, c.name, d.name, a.block_plasma, e.name, a.area_coefficient, b.block_area, a.planted_area,
+	a.plant_total,a.maturate_time_norm,a.planted_date,a.mature_date,a.plant_mature_age,a.plant_immature_age,a.is_dummy,a.operating_unit_id,
+	a.company_id, a.estate_id, a.division_id, FALSE, x.login, a.create_date, y.login, a.write_date
+FROM
+    plantation_land_planted a
+    LEFT JOIN plantation_land_block b ON b.id = a.block_id
+    LEFT JOIN plantation_land_topograph c ON c.id = b.topograph_id
+    LEFT JOIN plantation_land_soil d ON d.id = b.soil_id
+    LEFT JOIN res_partner e ON e.id = a.owner_plasma_id
+    LEFT JOIN res_users x ON x.id = a.create_uid
+    LEFT JOIN res_users y ON y.id = a.write_uid
+WHERE a.active 
+ON CONFLICT (id) DO UPDATE
+SET
+	code = EXCLUDED.code,
+    code2 = EXCLUDED.code2,
+    name = EXCLUDED.name,
+    topograph = EXCLUDED.topograph,
+    soil = EXCLUDED.soil,
+    is_plasma = EXCLUDED.is_plasma,
+    plasma_owner = EXCLUDED.plasma_owner,
+    area_coefficient = EXCLUDED.area_coefficient,
+    block_area = EXCLUDED.block_area,
+    planted_area = EXCLUDED.planted_area,
+    plant_total = EXCLUDED.plant_total,
+    maturate_time = EXCLUDED.maturate_time,
+    planted_date = EXCLUDED.planted_date,
+    mature_date = EXCLUDED.mature_date,
+    mature_age = EXCLUDED.mature_age,
+    immature_age = EXCLUDED.immature_age,
+    is_dummmy = EXCLUDED.is_dummmy,
+    operating_unit_id = EXCLUDED.operating_unit_id,
+    company_id = EXCLUDED.company_id,
+    estate_id = EXCLUDED.estate_id,
+    division_id = EXCLUDED.division_id,
+    is_disabled = FALSE,
+    create_by = EXCLUDED.create_by,
+    create_date = EXCLUDED.create_date,
+    write_by = EXCLUDED.write_by,
+    write_date = EXCLUDED.write_date
+;
+
+
