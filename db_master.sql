@@ -43,12 +43,12 @@ CREATE TABLE m_estate (
     CONSTRAINT fk_operating_unit FOREIGN KEY (operating_unit_id) REFERENCES m_operating_unit(id) 
 );
 
-CREATE TABLE m_division (
+CREATE TABLE m_afdeling (
     id SERIAL PRIMARY KEY,
     code VARCHAR NOT NULL UNIQUE,
     name VARCHAR NOT NULL,
     mark VARCHAR,
-    parent_division_id INT4,
+    parent_id INT4,
     operating_unit_id INT4 NOT NULL,
     company_id INT4 NOT NULL,
     estate_id INT4 NOT NULL,
@@ -58,7 +58,7 @@ CREATE TABLE m_division (
     write_by VARCHAR,
     write_date TIMESTAMP,
     
-    CONSTRAINT fk_parent_division_id FOREIGN KEY (parent_division_id) REFERENCES m_division(id),
+    CONSTRAINT fk_parent_id FOREIGN KEY (parent_id) REFERENCES m_division(id),
     CONSTRAINT fk_operating_unit FOREIGN KEY (operating_unit_id) REFERENCES m_operating_unit(id),
     CONSTRAINT fk_company FOREIGN KEY (company_id) REFERENCES m_company(id),
     CONSTRAINT fk_estate FOREIGN KEY (estate_id) REFERENCES m_estate(id)
@@ -86,7 +86,7 @@ CREATE TABLE m_block (
     operating_unit_id INT4 NOT NULL,
     company_id INT4 NOT NULL,
     estate_id INT4 NOT NULL,
-    division_id INT4,
+    afdeling_id INT4,
     is_disabled BOOLEAN DEFAULT FALSE,
     create_by VARCHAR,
     create_date TIMESTAMP,
@@ -96,7 +96,7 @@ CREATE TABLE m_block (
     CONSTRAINT fk_operating_unit FOREIGN KEY (operating_unit_id) REFERENCES m_operating_unit(id),
     CONSTRAINT fk_company FOREIGN KEY (company_id) REFERENCES m_company(id),
     CONSTRAINT fk_estate FOREIGN KEY (estate_id) REFERENCES m_estate(id),
-    CONSTRAINT fk_division FOREIGN KEY (division_id) REFERENCES m_division(id)
+    CONSTRAINT fk_afdeling FOREIGN KEY (afdeling_id) REFERENCES m_afdeling(id)
 );
 
 
@@ -194,10 +194,10 @@ SET
     write_date = EXCLUDED.write_date
 ;
 
--- division
-UPDATE m_division SET is_disabled = TRUE;
-INSERT INTO m_division (id, code, name, mark, parent_division_id, operating_unit_id, company_id, estate_id, is_disabled, create_by, create_date, write_by, write_date)
-SELECT a.id, a.code, a.name, a.mark, a.parent_division_id, a.operating_unit_id, a.company_id, a.estate_id, FALSE, x.login, a.create_date, y.login, a.write_date
+-- afdeling
+UPDATE m_afdeling SET is_disabled = TRUE;
+INSERT INTO m_afdeling (id, code, name, mark, parent_id, operating_unit_id, company_id, estate_id, is_disabled, create_by, create_date, write_by, write_date)
+SELECT a.id, a.code, a.name, a.mark, a.parent_id, a.operating_unit_id, a.company_id, a.estate_id, FALSE, x.login, a.create_date, y.login, a.write_date
 FROM
     plantation_division a
     LEFT JOIN res_users x ON x.id = a.create_uid
@@ -208,7 +208,7 @@ SET
     code = EXCLUDED.code,
     name = EXCLUDED.name,
     mark = EXCLUDED.mark,
-    parent_division_id = EXCLUDED.parent_division_id,
+    parent_id = EXCLUDED.parent_id,
     operating_unit_id = EXCLUDED.operating_unit_id,
     company_id = EXCLUDED.company_id,
     estate_id = EXCLUDED.estate_id,
@@ -224,7 +224,7 @@ UPDATE m_block SET is_disabled = TRUE;
 INSERT INTO m_block (
 	id,code,code2,name,topograph,soil,is_plasma,plasma_owner,area_coefficient,block_area,planted_area,
 	plant_total,maturate_time,planted_date,mature_date,mature_age,immature_age,is_dummmy,operating_unit_id,
-	company_id,estate_id,division_id,is_disabled,create_by,create_date,write_by,write_date
+	company_id,estate_id,afdeling_id,is_disabled,create_by,create_date,write_by,write_date
 )
 SELECT 
 	a.id, a.code, b.code, a.name, c.name, d.name, a.block_plasma, e.name, a.area_coefficient, b.block_area, a.planted_area,
@@ -261,7 +261,7 @@ SET
     operating_unit_id = EXCLUDED.operating_unit_id,
     company_id = EXCLUDED.company_id,
     estate_id = EXCLUDED.estate_id,
-    division_id = EXCLUDED.division_id,
+    afdeling_id = EXCLUDED.afdeling_id,
     is_disabled = FALSE,
     create_by = EXCLUDED.create_by,
     create_date = EXCLUDED.create_date,
