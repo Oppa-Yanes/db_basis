@@ -43,6 +43,29 @@ CREATE TABLE m_estate (
     CONSTRAINT fk_operating_unit FOREIGN KEY (operating_unit_id) REFERENCES m_operating_unit(id) 
 );
 
+CREATE TABLE m_division (
+    id SERIAL PRIMARY KEY,
+    code VARCHAR NOT NULL UNIQUE,
+    name VARCHAR NOT NULL,
+    mark VARCHAR,
+    parent_division_id INT4,
+    operating_unit_id INT4 NOT NULL,
+    company_id INT4 NOT NULL,
+    estate_id INT4 NOT NULL,
+    is_disabled BOOLEAN DEFAULT FALSE,
+    create_by VARCHAR,
+    create_date TIMESTAMP,
+    write_by VARCHAR,
+    write_date TIMESTAMP,
+    
+    CONSTRAINT fk_parent_division_id FOREIGN KEY (parent_division_id) REFERENCES m_division(id),
+    CONSTRAINT fk_operating_unit FOREIGN KEY (operating_unit_id) REFERENCES m_operating_unit(id),
+    CONSTRAINT fk_company FOREIGN KEY (company_id) REFERENCES m_company(id),
+    CONSTRAINT fk_estate FOREIGN KEY (estate_id) REFERENCES m_estate(id)
+);
+
+
+
 -- CREATE ACCESS TO ODOO DB
 
 CREATE EXTENSION IF NOT EXISTS postgres_fdw;
@@ -137,3 +160,27 @@ SET
     write_date = EXCLUDED.write_date
 ;
 
+-- division
+UPDATE m_division SET is_disabled = TRUE;
+INSERT INTO m_division (id, code, name, mark, parent_division_id, operating_unit_id, company_id, estate_id, is_disabled, create_by, create_date, write_by, write_date)
+SELECT a.id, a.code, a.name, a.mark, a.parent_division_id, a.operating_unit_id, a.company_id, a.estate_id, FALSE, x.login, a.create_date, y.login, a.write_date
+FROM
+    plantation_division a
+    LEFT JOIN res_users x ON x.id = a.create_uid
+    LEFT JOIN res_users y ON y.id = a.write_uid
+WHERE a.active AND a.is_office = FALSE 
+ON CONFLICT (id) DO UPDATE
+SET
+    code = EXCLUDED.code,
+    name = EXCLUDED.name,
+    mark = EXCLUDED.mark,
+    parent_division_id = EXCLUDED.parent_division_id,
+    operating_unit_id = EXCLUDED.operating_unit_id,
+    company_id = EXCLUDED.company_id,
+    estate_id = EXCLUDED.estate_id,
+    is_disabled = FALSE,
+    create_by = EXCLUDED.create_by,
+    create_date = EXCLUDED.create_date,
+    write_by = EXCLUDED.write_by,
+    write_date = EXCLUDED.write_date
+;
