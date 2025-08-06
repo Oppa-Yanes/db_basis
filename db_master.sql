@@ -183,6 +183,34 @@ CREATE TABLE m_employee (
     CONSTRAINT fk_department FOREIGN KEY (department_id) REFERENCES m_department(id)    
 );
 
+CREATE TABLE m_foreman_group (
+    id SERIAL PRIMARY KEY,
+    code VARCHAR NOT NULL UNIQUE,
+    name VARCHAR NOT NULL,
+    type VARCHAR NOT NULL,
+    foreman_id INT4,
+    foreman1_id INT4,
+    kerani_id INT4,
+    kerani1_id INT4,
+    kerani_panen_id INT4,
+    operating_unit_id INT4 NOT NULL,
+    company_id INT4 NOT NULL,
+    department_id INT4,
+    is_disabled BOOLEAN DEFAULT FALSE,
+    create_by VARCHAR,
+    create_date TIMESTAMP,
+    write_by VARCHAR,
+    write_date TIMESTAMP,
+    
+    CONSTRAINT fk_operating_unit FOREIGN KEY (operating_unit_id) REFERENCES m_operating_unit(id),
+    CONSTRAINT fk_company FOREIGN KEY (company_id) REFERENCES m_company(id),
+    CONSTRAINT fk_department FOREIGN KEY (department_id) REFERENCES m_department(id),
+    CONSTRAINT fk_foreman_id FOREIGN KEY (foreman_id) REFERENCES m_employee(id),
+    CONSTRAINT fk_foreman1_id FOREIGN KEY (foreman1_id) REFERENCES m_employee(id),
+    CONSTRAINT fk_kerani_id FOREIGN KEY (kerani_id) REFERENCES m_employee(id),
+    CONSTRAINT fk_kerani1_id FOREIGN KEY (kerani1_id) REFERENCES m_employee(id),
+    CONSTRAINT fk_kerani_panen_id FOREIGN KEY (kerani_panen_id) REFERENCES m_employee(id)
+);
 
 
 -- CREATE ACCESS TO ODOO DB
@@ -497,5 +525,33 @@ SET
 	write_date       = EXCLUDED.write_date
 ;
 
+-- foreman group
+UPDATE m_foreman_group SET is_disabled = TRUE;
+INSERT INTO m_foreman_group (id, code, name, type, foreman_id, foreman1_id, kerani_id, kerani1_id, kerani_panen_id, operating_unit_id, company_id, department_id, is_disabled, create_by, create_date, write_by, write_date)
+SELECT a.id, a.code, a.name, a.type, foreman_id, foreman1_id, kerani_id, kerani1_id, kerani_harvest_id, a.operating_unit_id, a.company_id, a.department_id, FALSE, x.login, a.create_date, y.login, a.write_date
+FROM
+    hr_foreman_group a
+    LEFT JOIN res_users x ON x.id = a.create_uid
+    LEFT JOIN res_users y ON y.id = a.write_uid
+WHERE a.active 
+ON CONFLICT (id) DO UPDATE
+SET
+    code              = EXCLUDED.code,
+    name              = EXCLUDED.name,
+    type              = EXCLUDED.type,
+    foreman_id        = EXCLUDED.foreman_id,
+    foreman1_id       = EXCLUDED.foreman1_id,
+    kerani_id         = EXCLUDED.kerani_id,
+    kerani1_id        = EXCLUDED.kerani1_id,
+    kerani_panen_id   = EXCLUDED.kerani_panen_id,
+    operating_unit_id = EXCLUDED.operating_unit_id,
+    company_id        = EXCLUDED.company_id,
+    department_id     = EXCLUDED.department_id,
+    is_disabled       = FALSE,
+    create_by         = EXCLUDED.create_by,
+    create_date       = EXCLUDED.create_date,
+    write_by          = EXCLUDED.write_by,
+    write_date        = EXCLUDED.write_date
+;
 
 
