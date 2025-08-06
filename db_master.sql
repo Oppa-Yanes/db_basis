@@ -99,6 +99,32 @@ CREATE TABLE m_block (
     CONSTRAINT fk_afdeling FOREIGN KEY (afdeling_id) REFERENCES m_afdeling(id)
 );
 
+DROP TABLE IF EXISTS m_tph;
+CREATE TABLE m_tph (
+    id SERIAL PRIMARY KEY,
+    code VARCHAR NOT NULL,
+    name VARCHAR NOT NULL,
+    lat FLOAT,
+    long FLOAT,
+    operating_unit_id INT4 NOT NULL,
+    company_id INT4 NOT NULL,
+    estate_id INT4 NOT NULL,
+    afdeling_id INT4 NOT NULL,
+    block_id INT4 NOT NULL,
+    is_disabled BOOLEAN DEFAULT FALSE,
+    create_by VARCHAR,
+    create_date TIMESTAMP,
+    write_by VARCHAR,
+    write_date TIMESTAMP,
+    
+    CONSTRAINT fk_operating_unit FOREIGN KEY (operating_unit_id) REFERENCES m_operating_unit(id),
+    CONSTRAINT fk_company FOREIGN KEY (company_id) REFERENCES m_company(id),
+    CONSTRAINT fk_estate FOREIGN KEY (estate_id) REFERENCES m_estate(id),
+    CONSTRAINT fk_afdeling FOREIGN KEY (afdeling_id) REFERENCES m_afdeling(id),
+    CONSTRAINT fk_block FOREIGN KEY (block_id) REFERENCES m_block(id)    
+);
+
+
 
 -- CREATE ACCESS TO ODOO DB
 
@@ -262,6 +288,36 @@ SET
     company_id = EXCLUDED.company_id,
     estate_id = EXCLUDED.estate_id,
     afdeling_id = EXCLUDED.afdeling_id,
+    is_disabled = FALSE,
+    create_by = EXCLUDED.create_by,
+    create_date = EXCLUDED.create_date,
+    write_by = EXCLUDED.write_by,
+    write_date = EXCLUDED.write_date
+;
+
+-- tph
+UPDATE m_tph SET is_disabled = TRUE;
+INSERT INTO m_tph (id,code,name,lat,long,operating_unit_id,company_id,estate_id,afdeling_id,block_id,is_disabled,create_by,create_date,write_by,write_date)
+SELECT 
+	a.id,REPLACE(a.name,' ',''),REPLACE(a.name,' ',''),0,0,a.operating_unit_id,a.company_id, b.estate_id, b.division_id, a.planted_block_id, FALSE, x.login, a.create_date, y.login, a.write_date
+FROM
+    plantation_harvest_staging a
+    LEFT JOIN plantation_land_planted b ON b.id = a.planted_block_id
+    --LEFT JOIN plantation_division c ON c.id = b.division_id
+    LEFT JOIN res_users x ON x.id = a.create_uid
+    LEFT JOIN res_users y ON y.id = a.write_uid
+WHERE a.active AND a.planted_block_id IS NOT NULL
+ON CONFLICT (id) DO UPDATE
+SET
+	code = EXCLUDED.code,
+    name = EXCLUDED.name,
+    lat = EXCLUDED.lat,
+    long = EXCLUDED.long,
+    operating_unit_id = EXCLUDED.operating_unit_id,
+    company_id = EXCLUDED.company_id,
+    estate_id = EXCLUDED.estate_id,
+    afdeling_id = EXCLUDED.afdeling_id,
+    block_id = EXCLUDED.block_id,
     is_disabled = FALSE,
     create_by = EXCLUDED.create_by,
     create_date = EXCLUDED.create_date,
