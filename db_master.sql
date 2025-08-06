@@ -55,5 +55,6 @@ SET
     write_by = EXCLUDED.write_by,
     write_date = EXCLUDED.write_date
 ;
-
+UPDATE m_company SET code = 'GBS' WHERE id = 1;
+UPDATE m_company SET code = 'LKK' WHERE id = 2;
 
