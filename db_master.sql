@@ -142,6 +142,48 @@ CREATE TABLE m_department (
     CONSTRAINT fk_parent_id FOREIGN KEY (parent_id) REFERENCES m_department(id)
 );
 
+CREATE TABLE m_employee (
+	id SERIAL PRIMARY KEY,
+	nip VARCHAR NOT NULL,
+	name VARCHAR NOT NULL,
+	operating_unit_id INT4,
+	company_id INT4 NOT NULL,
+	estate_id INT4,
+	division_id INT4,
+	department_id INT4 NOT NULL,
+	foreman_group_id INT4,
+	foreman_id INT4,
+	job_level_id INT4,
+	job_level VARCHAR,
+	job_id INT4 NOT NULL,
+	job_name VARCHAR NOT NULL,
+	type_id INT4 NOT NULL,
+	type_name VARCHAR NOT NULL,
+	status_id INT4 NOT NULL,
+	job_status VARCHAR NOT NULL,
+	gender VARCHAR,
+	birthday DATE,
+	id_number VARCHAR,
+	work_date_start DATE,
+	work_duration VARCHAR NOT NULL,
+	contract_start DATE,
+	contract_end DATE,
+	contract_state VARCHAR,
+	hr_transition VARCHAR,
+	is_disabled BOOLEAN DEFAULT FALSE,
+	create_by VARCHAR,
+	create_date TIMESTAMP,
+	write_by VARCHAR,
+	write_date TIMESTAMP,
+    
+    CONSTRAINT fk_operating_unit FOREIGN KEY (operating_unit_id) REFERENCES m_operating_unit(id),
+    CONSTRAINT fk_company FOREIGN KEY (company_id) REFERENCES m_company(id),
+    CONSTRAINT fk_estate FOREIGN KEY (estate_id) REFERENCES m_estate(id),
+    CONSTRAINT fk_division FOREIGN KEY (division_id) REFERENCES m_afdeling(id),
+    CONSTRAINT fk_department FOREIGN KEY (department_id) REFERENCES m_department(id)    
+);
+
+
 
 -- CREATE ACCESS TO ODOO DB
 
@@ -367,6 +409,93 @@ SET
     write_date = EXCLUDED.write_date
 ;
 
+-- m_employee
+UPDATE m_employee SET is_disabled = TRUE;
+INSERT INTO m_employee (
+	id, nip, name, operating_unit_id, company_id, estate_id, division_id, department_id, foreman_group_id, foreman_id, job_level_id, job_level,
+	job_id, job_name, type_id, type_name, status_id, job_status, gender, birthday, id_number, work_date_start, work_duration,
+	contract_start, contract_end, contract_state, hr_transition,
+	is_disabled, create_by, create_date, write_by, write_date
+)
+SELECT 
+	emp.id,
+	emp.nomor_induk_pegawai AS nip,
+	emp.name AS emp_name,
+	emp.operating_unit_id,
+	emp.company_id,
+	div.estate_id,
+	emp.division_id,
+	emp.department_id,
+	emp.foreman_group_id,
+	emp.foreman_id,
+	emp.job_level_id,
+	lvl.name AS job_level,
+	emp.job_id,
+	job.name AS job_name,
+	emp.employee_type_id AS type_id,
+	typ.name AS employee_type,
+	emp.employee_status_id AS status_id,
+	sts.name AS job_status,
+	emp.gender,
+	emp.birthday,
+	emp.identification_id AS id_number,
+	emp.work_date_start,
+	emp.work_duration_string AS work_duration,
+	ctract.date_start AS contract_start,
+	ctract.date_end AS contract_end,
+	ctract.state AS contract_state,
+	ctract.hr_transition,
+	FALSE,
+	cu.login AS create_by,
+	emp.create_date,
+	wu.login AS write_by,
+	emp.write_date
+FROM
+	hr_employee emp
+	LEFT JOIN hr_department dept ON dept.id = emp.department_id
+	LEFT JOIN plantation_division div ON div.id = emp.division_id
+	LEFT JOIN hr_employee_type typ ON typ.id = emp.employee_type_id
+	LEFT JOIN hr_job job ON job.id = emp.job_id
+	LEFT JOIN hit_md_employee_status sts ON sts.id = emp.employee_status_id
+	LEFT JOIN hit_md_job_level lvl ON lvl.id = emp.job_level_id
+	LEFT JOIN hr_contract ctract ON ctract.id = emp.contract_id
+	LEFT JOIN res_users cu ON cu.id = emp.create_uid
+	LEFT JOIN res_users wu ON wu.id = emp.write_uid
+WHERE emp.active
+ON CONFLICT (id) DO UPDATE
+SET
+	nip              = EXCLUDED.nip,
+	name             = EXCLUDED.name,
+	operating_unit_id = EXCLUDED.operating_unit_id,
+	company_id       = EXCLUDED.company_id,
+	estate_id        = EXCLUDED.estate_id,
+	division_id      = EXCLUDED.division_id,
+	department_id    = EXCLUDED.department_id,
+	foreman_group_id = EXCLUDED.foreman_group_id,
+	foreman_id       = EXCLUDED.foreman_id,
+	job_level_id     = EXCLUDED.job_level_id,
+	job_level        = EXCLUDED.job_level,
+	job_id           = EXCLUDED.job_id,
+	job_name         = EXCLUDED.job_name,
+	type_id          = EXCLUDED.type_id,
+	type_name        = EXCLUDED.type_name,
+	status_id        = EXCLUDED.status_id,
+	job_status       = EXCLUDED.job_status,
+	gender           = EXCLUDED.gender,
+	birthday         = EXCLUDED.birthday,
+	id_number        = EXCLUDED.id_number,
+	work_date_start  = EXCLUDED.work_date_start,
+	work_duration    = EXCLUDED.work_duration,
+	contract_start   = EXCLUDED.contract_start,
+	contract_end     = EXCLUDED.contract_end,
+	contract_state   = EXCLUDED.contract_state,
+	hr_transition    = EXCLUDED.hr_transition,
+	is_disabled      = FALSE,
+	create_by        = EXCLUDED.create_by,
+	create_date      = EXCLUDED.create_date,
+	write_by         = EXCLUDED.write_by,
+	write_date       = EXCLUDED.write_date
+;
 
 
 
