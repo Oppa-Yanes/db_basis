@@ -26,3 +26,16 @@ INTO public;
 -- SELECT * FROM hr_foreman_group LIMIT 10;
 -- END CREATE
 
+CREATE TABLE m_company (
+    id SERIAL PRIMARY KEY,
+    code VARCHAR,
+    name VARCHAR NOT NULL UNIQUE,
+    email VARCHAR,
+    phone VARCHAR,
+    create_uid INT,
+    create_date TIMESTAMP,
+    write_uid INT,
+    write_date TIMESTAMP
+);
+
+
