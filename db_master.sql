@@ -298,7 +298,7 @@ SET
 -- estate
 UPDATE m_estate SET is_disabled = TRUE;
 INSERT INTO m_estate (id, code, name, mark, is_pabrik, is_nursery, operating_unit_id, company_id, is_disabled, create_by, create_date, write_by, write_date)
-SELECT a.id, a.code, a.name, a.mark, a.is_pabrik, a.is_nursery, a.operating_unit_id, a.company_id, FALSE, x.login, a.create_date, y.login, a.write_date
+SELECT a.id, a.code, a.name, a.mark, COALESCE(a.is_pabrik,FALSE), COALESCE(a.is_nursery,FALSE), a.operating_unit_id, a.company_id, FALSE, x.login, a.create_date, y.login, a.write_date
 FROM
     plantation_estate a
     LEFT JOIN res_users x ON x.id = a.create_uid
@@ -320,9 +320,9 @@ SET
     write_date = EXCLUDED.write_date
 ;
 
--- afdeling
-UPDATE m_afdeling SET is_disabled = TRUE;
-INSERT INTO m_afdeling (id, code, name, mark, operating_unit_id, company_id, estate_id, parent_id, is_disabled, create_by, create_date, write_by, write_date)
+-- divisi
+UPDATE m_division SET is_disabled = TRUE;
+INSERT INTO m_division (id, code, name, mark, operating_unit_id, company_id, estate_id, parent_id, is_disabled, create_by, create_date, write_by, write_date)
 SELECT a.id, a.code, a.name, a.mark, a.operating_unit_id, a.company_id, a.estate_id, a.parent_division_id, FALSE, x.login, a.create_date, y.login, a.write_date
 FROM
     plantation_division a
@@ -350,10 +350,10 @@ UPDATE m_block SET is_disabled = TRUE;
 INSERT INTO m_block (
 	id,code,code2,name,topograph,soil,is_plasma,plasma_owner,area_coefficient,block_area,planted_area,
 	plant_total,maturate_time,planted_date,mature_date,mature_age,immature_age,is_dummmy,operating_unit_id,
-	company_id,estate_id,afdeling_id,is_disabled,create_by,create_date,write_by,write_date
+	company_id,estate_id,division_id,is_disabled,create_by,create_date,write_by,write_date
 )
 SELECT 
-	a.id, a.code, b.code, a.name, c.name, d.name, a.block_plasma, e.name, a.area_coefficient, b.block_area, a.planted_area,
+	a.id, a.code, b.code, a.name, c.name, d.name, COALESCE(a.block_plasma,FALSE), e.name, a.area_coefficient, b.block_area, a.planted_area,
 	a.plant_total,a.maturate_time_norm,a.planted_date,a.mature_date,a.plant_mature_age,a.plant_immature_age,a.is_dummy,a.operating_unit_id,
 	a.company_id, a.estate_id, a.division_id, FALSE, x.login, a.create_date, y.login, a.write_date
 FROM
@@ -387,7 +387,7 @@ SET
     operating_unit_id = EXCLUDED.operating_unit_id,
     company_id = EXCLUDED.company_id,
     estate_id = EXCLUDED.estate_id,
-    afdeling_id = EXCLUDED.afdeling_id,
+    division_id = EXCLUDED.division_id,
     is_disabled = FALSE,
     create_by = EXCLUDED.create_by,
     create_date = EXCLUDED.create_date,
@@ -397,13 +397,12 @@ SET
 
 -- tph
 UPDATE m_tph SET is_disabled = TRUE;
-INSERT INTO m_tph (id,code,name,lat,long,operating_unit_id,company_id,estate_id,afdeling_id,block_id,is_disabled,create_by,create_date,write_by,write_date)
+INSERT INTO m_tph (id,code,name,lat,long,lat_adj,long_adj,operating_unit_id,company_id,estate_id,division_id,block_id,is_disabled,create_by,create_date,write_by,write_date)
 SELECT 
-	a.id,REPLACE(a.name,' ',''),REPLACE(a.name,' ',''),0,0,a.operating_unit_id,a.company_id, b.estate_id, b.division_id, a.planted_block_id, FALSE, x.login, a.create_date, y.login, a.write_date
+	a.id,REPLACE(a.name,' ',''),REPLACE(a.name,' ',''),0,0,0,0,a.operating_unit_id,a.company_id, b.estate_id, b.division_id, a.planted_block_id, FALSE, x.login, a.create_date, y.login, a.write_date
 FROM
     plantation_harvest_staging a
     LEFT JOIN plantation_land_planted b ON b.id = a.planted_block_id
-    --LEFT JOIN plantation_division c ON c.id = b.division_id
     LEFT JOIN res_users x ON x.id = a.create_uid
     LEFT JOIN res_users y ON y.id = a.write_uid
 WHERE a.active AND a.planted_block_id IS NOT NULL
@@ -416,7 +415,7 @@ SET
     operating_unit_id = EXCLUDED.operating_unit_id,
     company_id = EXCLUDED.company_id,
     estate_id = EXCLUDED.estate_id,
-    afdeling_id = EXCLUDED.afdeling_id,
+    division_id = EXCLUDED.division_id,
     block_id = EXCLUDED.block_id,
     is_disabled = FALSE,
     create_by = EXCLUDED.create_by,
