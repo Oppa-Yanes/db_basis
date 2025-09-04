@@ -3,7 +3,6 @@ CREATE TABLE m_profile (
 	emp_id INT4 NOT NULL,
 	nip VARCHAR NOT NULL,
 	name VARCHAR NOT NULL,
-	operating_unit_id INT4,
 	company_id INT4,
 	estate_id INT4,
 	division_id INT4,
