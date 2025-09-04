@@ -209,7 +209,7 @@ CREATE TABLE m_foreman_group (
     kerani_panen_id INT4,
     operating_unit_id INT4 NOT NULL,
     company_id INT4 NOT NULL,
-    division_id INT4 NOT NULL,
+    division_id INT4,
     is_disabled BOOLEAN DEFAULT FALSE,
     create_by VARCHAR,
     create_date TIMESTAMP,
@@ -345,6 +345,31 @@ SET
     write_date = EXCLUDED.write_date
 ;
 
+-- department
+UPDATE m_department SET is_disabled = TRUE;
+INSERT INTO m_department (id, code, name, complete_name, operating_unit_id, company_id, parent_id, is_disabled, create_by, create_date, write_by, write_date)
+SELECT a.id, NULL, a.name, a.complete_name, b.operating_unit_id, a.company_id, a.parent_id, FALSE, x.login, a.create_date, y.login, a.write_date
+FROM
+    hr_department a
+    LEFT JOIN plantation_division b ON b.id = a.division_id
+    LEFT JOIN res_users x ON x.id = a.create_uid
+    LEFT JOIN res_users y ON y.id = a.write_uid
+WHERE a.active
+ON CONFLICT (id) DO UPDATE
+SET
+    code = EXCLUDED.code,
+    name = EXCLUDED.name,
+    complete_name = EXCLUDED.complete_name,
+    operating_unit_id = EXCLUDED.operating_unit_id,
+    company_id = EXCLUDED.company_id,
+    parent_id = EXCLUDED.parent_id,
+    is_disabled = FALSE,
+    create_by = EXCLUDED.create_by,
+    create_date = EXCLUDED.create_date,
+    write_by = EXCLUDED.write_by,
+    write_date = EXCLUDED.write_date
+;
+
 -- block
 UPDATE m_block SET is_disabled = TRUE;
 INSERT INTO m_block (
@@ -417,31 +442,6 @@ SET
     estate_id = EXCLUDED.estate_id,
     division_id = EXCLUDED.division_id,
     block_id = EXCLUDED.block_id,
-    is_disabled = FALSE,
-    create_by = EXCLUDED.create_by,
-    create_date = EXCLUDED.create_date,
-    write_by = EXCLUDED.write_by,
-    write_date = EXCLUDED.write_date
-;
-
--- department
-UPDATE m_department SET is_disabled = TRUE;
-INSERT INTO m_department (id, code, name, complete_name, operating_unit_id, company_id, parent_id, is_disabled, create_by, create_date, write_by, write_date)
-SELECT a.id, NULL, a.name, a.complete_name, b.operating_unit_id, a.company_id, a.parent_id, FALSE, x.login, a.create_date, y.login, a.write_date
-FROM
-    hr_department a
-    LEFT JOIN plantation_division b ON b.id = a.division_id
-    LEFT JOIN res_users x ON x.id = a.create_uid
-    LEFT JOIN res_users y ON y.id = a.write_uid
-WHERE a.active
-ON CONFLICT (id) DO UPDATE
-SET
-    code = EXCLUDED.code,
-    name = EXCLUDED.name,
-    complete_name = EXCLUDED.complete_name,
-    operating_unit_id = EXCLUDED.operating_unit_id,
-    company_id = EXCLUDED.company_id,
-    parent_id = EXCLUDED.parent_id,
     is_disabled = FALSE,
     create_by = EXCLUDED.create_by,
     create_date = EXCLUDED.create_date,
@@ -541,10 +541,11 @@ SET
 
 -- foreman group
 UPDATE m_foreman_group SET is_disabled = TRUE;
-INSERT INTO m_foreman_group (id, code, name, type, foreman_id, foreman1_id, kerani_id, kerani1_id, kerani_panen_id, operating_unit_id, company_id, department_id, is_disabled, create_by, create_date, write_by, write_date)
-SELECT a.id, a.code, a.name, a.type, foreman_id, foreman1_id, kerani_id, kerani1_id, kerani_harvest_id, a.operating_unit_id, a.company_id, a.department_id, FALSE, x.login, a.create_date, y.login, a.write_date
+INSERT INTO m_foreman_group (id, code, name, type, foreman_id, foreman1_id, kerani_id, kerani1_id, kerani_panen_id, operating_unit_id, company_id, division_id, is_disabled, create_by, create_date, write_by, write_date)
+SELECT a.id, a.code, a.name, a.type, a.foreman_id, a.foreman1_id, a.kerani_id, a.kerani1_id, a.kerani_harvest_id, a.operating_unit_id, a.company_id, b.division_id, FALSE, x.login, a.create_date, y.login, a.write_date
 FROM
     hr_foreman_group a
+    LEFT JOIN hr_department b ON b.id = a.department_id
     LEFT JOIN res_users x ON x.id = a.create_uid
     LEFT JOIN res_users y ON y.id = a.write_uid
 WHERE a.active 
@@ -560,12 +561,13 @@ SET
     kerani_panen_id   = EXCLUDED.kerani_panen_id,
     operating_unit_id = EXCLUDED.operating_unit_id,
     company_id        = EXCLUDED.company_id,
-    department_id     = EXCLUDED.department_id,
+    division_id       = EXCLUDED.division_id,
     is_disabled       = FALSE,
     create_by         = EXCLUDED.create_by,
     create_date       = EXCLUDED.create_date,
     write_by          = EXCLUDED.write_by,
     write_date        = EXCLUDED.write_date
 ;
+
 
 
