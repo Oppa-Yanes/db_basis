@@ -1,3 +1,13 @@
+DROP TABLE IF EXISTS m_foreman_group;
+DROP TABLE IF EXISTS m_employee;
+DROP TABLE IF EXISTS m_tph;
+DROP TABLE IF EXISTS m_block;
+DROP TABLE IF EXISTS m_department;
+DROP TABLE IF EXISTS m_division;
+DROP TABLE IF EXISTS m_estate;
+DROP TABLE IF EXISTS m_operating_unit;
+DROP TABLE IF EXISTS m_company;
+
 CREATE TABLE m_company (
     id SERIAL PRIMARY KEY,
     code VARCHAR NOT NULL UNIQUE,
@@ -43,7 +53,7 @@ CREATE TABLE m_estate (
     CONSTRAINT fk_operating_unit FOREIGN KEY (operating_unit_id) REFERENCES m_operating_unit(id) 
 );
 
-CREATE TABLE m_afdeling (
+CREATE TABLE m_division (
     id SERIAL PRIMARY KEY,
     code VARCHAR NOT NULL UNIQUE,
     name VARCHAR NOT NULL,
@@ -61,7 +71,26 @@ CREATE TABLE m_afdeling (
     CONSTRAINT fk_operating_unit FOREIGN KEY (operating_unit_id) REFERENCES m_operating_unit(id),
     CONSTRAINT fk_company FOREIGN KEY (company_id) REFERENCES m_company(id),
     CONSTRAINT fk_estate FOREIGN KEY (estate_id) REFERENCES m_estate(id),
-    CONSTRAINT fk_parent_id FOREIGN KEY (parent_id) REFERENCES m_afdeling(id)
+    CONSTRAINT fk_parent FOREIGN KEY (parent_id) REFERENCES m_division(id)
+);
+
+CREATE TABLE m_department (
+    id SERIAL PRIMARY KEY,
+    code VARCHAR,
+    name VARCHAR NOT NULL,
+    complete_name VARCHAR NOT NULL,
+    operating_unit_id INT4,
+    company_id INT4 NOT NULL,
+    parent_id INT4,
+    is_disabled BOOLEAN DEFAULT FALSE,
+    create_by VARCHAR,
+    create_date TIMESTAMP,
+    write_by VARCHAR,
+    write_date TIMESTAMP,
+    
+    CONSTRAINT fk_operating_unit FOREIGN KEY (operating_unit_id) REFERENCES m_operating_unit(id),
+    CONSTRAINT fk_company FOREIGN KEY (company_id) REFERENCES m_company(id),
+    CONSTRAINT fk_parent FOREIGN KEY (parent_id) REFERENCES m_department(id)
 );
 
 CREATE TABLE m_block (
@@ -86,7 +115,7 @@ CREATE TABLE m_block (
     operating_unit_id INT4 NOT NULL,
     company_id INT4 NOT NULL,
     estate_id INT4 NOT NULL,
-    afdeling_id INT4 NOT NULL,
+    division_id INT4 NOT NULL,
     is_disabled BOOLEAN DEFAULT FALSE,
     create_by VARCHAR,
     create_date TIMESTAMP,
@@ -96,19 +125,21 @@ CREATE TABLE m_block (
     CONSTRAINT fk_operating_unit FOREIGN KEY (operating_unit_id) REFERENCES m_operating_unit(id),
     CONSTRAINT fk_company FOREIGN KEY (company_id) REFERENCES m_company(id),
     CONSTRAINT fk_estate FOREIGN KEY (estate_id) REFERENCES m_estate(id),
-    CONSTRAINT fk_afdeling FOREIGN KEY (afdeling_id) REFERENCES m_afdeling(id)
+    CONSTRAINT fk_division FOREIGN KEY (division_id) REFERENCES m_division(id)
 );
 
 CREATE TABLE m_tph (
     id SERIAL PRIMARY KEY,
     code VARCHAR NOT NULL,
     name VARCHAR NOT NULL,
-    lat FLOAT,
-    long FLOAT,
+    lat FLOAT NOT NULL DEFAULT 0.0,
+    long FLOAT NOT NULL DEFAULT 0.0,
+    lat_adj INT NOT NULL DEFAULT 0,
+	long_adj INT NOT NULL DEFAULT 0,
     operating_unit_id INT4 NOT NULL,
     company_id INT4 NOT NULL,
     estate_id INT4 NOT NULL,
-    afdeling_id INT4 NOT NULL,
+    division_id INT4 NOT NULL,
     block_id INT4 NOT NULL,
     is_disabled BOOLEAN DEFAULT FALSE,
     create_by VARCHAR,
@@ -119,28 +150,10 @@ CREATE TABLE m_tph (
     CONSTRAINT fk_operating_unit FOREIGN KEY (operating_unit_id) REFERENCES m_operating_unit(id),
     CONSTRAINT fk_company FOREIGN KEY (company_id) REFERENCES m_company(id),
     CONSTRAINT fk_estate FOREIGN KEY (estate_id) REFERENCES m_estate(id),
-    CONSTRAINT fk_afdeling FOREIGN KEY (afdeling_id) REFERENCES m_afdeling(id),
+    CONSTRAINT fk_division FOREIGN KEY (division_id) REFERENCES m_division(id),
     CONSTRAINT fk_block FOREIGN KEY (block_id) REFERENCES m_block(id)    
 );
 
-CREATE TABLE m_department (
-    id SERIAL PRIMARY KEY,
-    code VARCHAR,
-    name VARCHAR NOT NULL,
-    complete_name VARCHAR NOT NULL,
-    operating_unit_id INT4,
-    company_id INT4 NOT NULL,
-    parent_id INT4,
-    is_disabled BOOLEAN DEFAULT FALSE,
-    create_by VARCHAR,
-    create_date TIMESTAMP,
-    write_by VARCHAR,
-    write_date TIMESTAMP,
-    
-    CONSTRAINT fk_operating_unit FOREIGN KEY (operating_unit_id) REFERENCES m_operating_unit(id),
-    CONSTRAINT fk_company FOREIGN KEY (company_id) REFERENCES m_company(id),
-    CONSTRAINT fk_parent_id FOREIGN KEY (parent_id) REFERENCES m_department(id)
-);
 
 CREATE TABLE m_employee (
 	id SERIAL PRIMARY KEY,
@@ -180,7 +193,7 @@ CREATE TABLE m_employee (
     CONSTRAINT fk_operating_unit FOREIGN KEY (operating_unit_id) REFERENCES m_operating_unit(id),
     CONSTRAINT fk_company FOREIGN KEY (company_id) REFERENCES m_company(id),
     CONSTRAINT fk_estate FOREIGN KEY (estate_id) REFERENCES m_estate(id),
-    CONSTRAINT fk_division FOREIGN KEY (division_id) REFERENCES m_afdeling(id),
+    CONSTRAINT fk_division FOREIGN KEY (division_id) REFERENCES m_division(id),
     CONSTRAINT fk_department FOREIGN KEY (department_id) REFERENCES m_department(id)    
 );
 
@@ -196,7 +209,7 @@ CREATE TABLE m_foreman_group (
     kerani_panen_id INT4,
     operating_unit_id INT4 NOT NULL,
     company_id INT4 NOT NULL,
-    department_id INT4,
+    division_id INT4 NOT NULL,
     is_disabled BOOLEAN DEFAULT FALSE,
     create_by VARCHAR,
     create_date TIMESTAMP,
@@ -205,14 +218,13 @@ CREATE TABLE m_foreman_group (
     
     CONSTRAINT fk_operating_unit FOREIGN KEY (operating_unit_id) REFERENCES m_operating_unit(id),
     CONSTRAINT fk_company FOREIGN KEY (company_id) REFERENCES m_company(id),
-    CONSTRAINT fk_department FOREIGN KEY (department_id) REFERENCES m_department(id),
-    CONSTRAINT fk_foreman_id FOREIGN KEY (foreman_id) REFERENCES m_employee(id),
-    CONSTRAINT fk_foreman1_id FOREIGN KEY (foreman1_id) REFERENCES m_employee(id),
-    CONSTRAINT fk_kerani_id FOREIGN KEY (kerani_id) REFERENCES m_employee(id),
-    CONSTRAINT fk_kerani1_id FOREIGN KEY (kerani1_id) REFERENCES m_employee(id),
-    CONSTRAINT fk_kerani_panen_id FOREIGN KEY (kerani_panen_id) REFERENCES m_employee(id)
+    CONSTRAINT fk_division FOREIGN KEY (division_id) REFERENCES m_division(id),
+    CONSTRAINT fk_foreman FOREIGN KEY (foreman_id) REFERENCES m_employee(id),
+    CONSTRAINT fk_foreman1 FOREIGN KEY (foreman1_id) REFERENCES m_employee(id),
+    CONSTRAINT fk_kerani FOREIGN KEY (kerani_id) REFERENCES m_employee(id),
+    CONSTRAINT fk_kerani1 FOREIGN KEY (kerani1_id) REFERENCES m_employee(id),
+    CONSTRAINT fk_kerani_panen FOREIGN KEY (kerani_panen_id) REFERENCES m_employee(id)
 );
-
 
 -- CREATE ACCESS TO ODOO DB
 
