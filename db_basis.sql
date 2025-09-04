@@ -1,1 +1,22 @@
-
+CREATE TABLE m_profile (
+	id UUID PRIMARY KEY,
+	emp_id INT4 NOT NULL,
+	nip VARCHAR NOT NULL,
+	name VARCHAR NOT NULL,
+	operating_unit_id INT4,
+	company_id INT4,
+	estate_id INT4,
+	division_id INT4,
+	job_level_id INT4,
+	access_level CHAR NOT NULL,
+	device_id VARCHAR, 
+	device_model VARCHAR,
+	last_version VARCHAR, 
+	last_update TIMESTAMP,
+	last_sync TIMESTAMP,
+	is_disabled BOOLEAN DEFAULT FALSE,
+	create_by VARCHAR,
+	create_date TIMESTAMP,
+	write_by VARCHAR,
+	write_date TIMESTAMP    
+);
