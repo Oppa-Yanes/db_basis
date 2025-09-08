@@ -24,6 +24,29 @@ INTO public;
 
 -- MAIN TABLES
 
+CREATE TABLE t_taksasi (
+	id SERIAL PRIMARY KEY,
+    code VARCHAR NOT NULL,
+	census_date DATE NOT NULL,
+	harvest_date DATE NOT NULL,
+	company_id INT4 NOT NULL,
+	estate_id INT4 NOT NULL,
+	division_id INT4 NOT NULL,	
+	block_id INT4 NOT NULL,
+	foreman_id INT4 NOT NULL,
+	harvest_area NUMERIC(8,2),
+	est_weight NUMERIC(8,2),
+	est_ripe_bunch INT4,
+	est_hk NUMERIC(8,2),
+	est_output NUMERIC(8,2),
+	state VARCHAR,
+    is_disabled BOOLEAN DEFAULT FALSE,    
+    create_by VARCHAR,
+    create_date TIMESTAMP,
+    write_by VARCHAR,
+    write_date TIMESTAMP
+);
+
 CREATE TABLE m_profile (
 	id UUID PRIMARY KEY,
 	emp_id INT4 NOT NULL,
@@ -109,5 +132,45 @@ CREATE TABLE t_rkh_location (
     CONSTRAINT fk_rkh FOREIGN KEY (rkh_id) REFERENCES t_rkh(id),
     CONSTRAINT fk_profile FOREIGN KEY (profile_id) REFERENCES m_profile(id)
 );
+
+-- IMPORT DATA
+
+UPDATE t_taksasi SET is_disabled = TRUE;
+INSERT INTO t_taksasi (
+	id, code, census_date, harvest_date, company_id, estate_id, division_id, block_id, foreman_id,
+	harvest_area, est_weight, est_ripe_bunch, est_hk, est_output, state,
+	is_disabled, create_by, create_date, write_by, write_date
+	)
+SELECT
+	a.id, a.name, a.taksasi_date, a.tanggal_rencana_panen, b.company_id, a.plantation_estate_id, a.division_id, a.block_land, a.foreman_id,
+	a.total_luas_panen, a.total_taksasi_panen, a.total_jumlah_janjang_masak, a.total_hk, a.jumlah_kghk, a.state,
+	FALSE, x.login, a.create_date, y.login, a.write_date
+FROM
+    plantation_taksasi a
+    LEFT JOIN plantation_division b ON b.id = a.division_id
+    LEFT JOIN res_users x ON x.id = a.create_uid
+    LEFT JOIN res_users y ON y.id = a.write_uid
+ON CONFLICT (id) DO UPDATE
+SET
+    code = EXCLUDED.code,
+    census_date = EXCLUDED.census_date,
+    harvest_date = EXCLUDED.harvest_date,
+    company_id = EXCLUDED.company_id,
+    estate_id = EXCLUDED.estate_id,
+    division_id = EXCLUDED.division_id,
+    block_id = EXCLUDED.block_id,
+    foreman_id = EXCLUDED.foreman_id,
+    harvest_area = EXCLUDED.harvest_area,
+    est_weight = EXCLUDED.est_weight,
+    est_ripe_bunch = EXCLUDED.est_ripe_bunch,
+    est_hk = EXCLUDED.est_hk,
+    est_output = EXCLUDED.est_output,
+    state = EXCLUDED.state,
+    is_disabled = FALSE,
+    create_by = EXCLUDED.create_by,
+    create_date = EXCLUDED.create_date,
+    write_by = EXCLUDED.write_by,
+    write_date = EXCLUDED.write_date
+;
 
 
