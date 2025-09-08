@@ -72,6 +72,7 @@ CREATE TABLE m_profile (
 CREATE TABLE t_rkh (
     id UUID PRIMARY KEY,
     rkh_date DATE NOT NULL,
+	stage CHAR NOT NULL,
 	company_id INT4 NOT NULL,
 	estate_id INT4 NOT NULL,
 	division_id INT4 NOT NULL,
