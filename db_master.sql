@@ -228,7 +228,7 @@ CREATE TABLE m_foreman_group (
     CONSTRAINT fk_kerani_panen FOREIGN KEY (kerani_panen_id) REFERENCES m_employee(id)
 );
 
--- CREATE ACCESS TO ODOO DB
+-- CREATE ACCESS TO ODOO GBS_PRD
 
 CREATE EXTENSION IF NOT EXISTS postgres_fdw;
 
