@@ -1,3 +1,5 @@
+CREATE DATABASE DB_MASTER;
+
 DROP TABLE IF EXISTS m_foreman_group;
 DROP TABLE IF EXISTS m_employee;
 DROP TABLE IF EXISTS m_tph;
@@ -250,7 +252,8 @@ IMPORT FOREIGN SCHEMA public
 FROM SERVER gbs_prd_server
 INTO public;
 
--- IMPORT ODOO
+-- IMPORT DATA MASTER ODOO
+-- Langkah: Import data backup ODOO GBS_PRD Server Production, ke LOCALHOST menggunakan PGAdmin4, format: plain, file: extract .tar.gz
 
 -- company
 UPDATE m_company SET is_disabled = TRUE;
