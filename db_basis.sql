@@ -104,6 +104,9 @@ CREATE TABLE t_rkh_member (
  	job_level_name VARCHAR,
 	job_id INT4 NOT NULL,
  	job_name VARCHAR,
+	is_asistensi BOOLEAN DEFAULT FALSE,
+	foreman_group_id INT4 NOT NULL,
+	foreman_group_name VARCHAR,
     profile_id UUID NOT NULL,
     date_sync TIMESTAMP,
     create_by VARCHAR,
@@ -120,8 +123,11 @@ CREATE TABLE t_rkh_location (
 	rkh_id UUID NOT NULL,
 	block_id INT4 NOT NULL,
 	block_code VARCHAR NOT NULL,
-	akp
-	taksasi
+	harvest_area NUMERIC(8,2),
+	est_weight NUMERIC(8,2),
+	est_ripe_bunch INT4,
+	est_hk NUMERIC(8,2),
+	est_output NUMERIC(8,2),
     profile_id UUID NOT NULL,
     date_sync TIMESTAMP,
     create_by VARCHAR,
