@@ -95,7 +95,7 @@ CREATE TABLE t_rkh (
     CONSTRAINT fk_profile FOREIGN KEY (profile_id) REFERENCES m_profile(id)
 );
 
-CREATE TABLE t_rkh_member (
+CREATE TABLE t_harvester (
     id UUID PRIMARY KEY,
 	rkh_id UUID NOT NULL,
 	emp_id INT4 NOT NULL,
@@ -119,7 +119,7 @@ CREATE TABLE t_rkh_member (
     CONSTRAINT fk_profile FOREIGN KEY (profile_id) REFERENCES m_profile(id)
 );
 
-CREATE TABLE t_rkh_location (
+CREATE TABLE t_location (
     id UUID PRIMARY KEY,
 	rkh_id UUID NOT NULL,
 	block_id INT4 NOT NULL,
@@ -137,6 +137,32 @@ CREATE TABLE t_rkh_location (
     write_date TIMESTAMP,
     
     CONSTRAINT fk_rkh FOREIGN KEY (rkh_id) REFERENCES t_rkh(id),
+    CONSTRAINT fk_profile FOREIGN KEY (profile_id) REFERENCES m_profile(id)
+);
+
+CREATE TABLE t_harvest (
+    id UUID PRIMARY KEY,
+    harvest_date DATE NOT NULL,
+ 	harvester_id UUID NOT NULL,
+	tph_id INT4 NOT NULL,
+	tph_code VARCHAR NOT NULL,
+    lat FLOAT NOT NULL DEFAULT 0,
+    long FLOAT NOT NULL DEFAULT 0,
+	bunch_qty INT4 NOT NULL DEFAULT 0,
+	unripe_qty INT4 NOT NULL DEFAULT 0,
+	overripe_qty INT4 NOT NULL DEFAULT 0,
+	rotten_qty INT4 NOT NULL DEFAULT 0,
+	empty_bunch_qty INT4 NOT NULL DEFAULT 0,
+	pic_path VARCHAR NOT NULL,
+	pic_uri VARCHAR NOT NULL,	
+ 	profile_id UUID NOT NULL,
+    date_sync TIMESTAMP,
+    create_by VARCHAR,
+    create_date TIMESTAMP,
+    write_by VARCHAR,
+    write_date TIMESTAMP,
+    
+    CONSTRAINT fk_harvester FOREIGN KEY (harvester_id) REFERENCES t_harvester(id),
     CONSTRAINT fk_profile FOREIGN KEY (profile_id) REFERENCES m_profile(id)
 );
 
