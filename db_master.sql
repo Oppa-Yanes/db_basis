@@ -433,7 +433,7 @@ FROM
     LEFT JOIN plantation_land_planted b ON b.id = a.planted_block_id
     LEFT JOIN res_users x ON x.id = a.create_uid
     LEFT JOIN res_users y ON y.id = a.write_uid
-WHERE a.active AND a.planted_block_id IS NOT NULL
+WHERE a.active AND a.planted_block_id IS NOT NULL AND a.name IS NOT NULL
 ON CONFLICT (id) DO UPDATE
 SET
 	code = EXCLUDED.code,
@@ -505,7 +505,7 @@ FROM
 	LEFT JOIN hr_contract ctract ON ctract.id = emp.contract_id
 	LEFT JOIN res_users cu ON cu.id = emp.create_uid
 	LEFT JOIN res_users wu ON wu.id = emp.write_uid
-WHERE emp.active
+WHERE emp.active AND emp.job_id IS NOT NULL 
 ON CONFLICT (id) DO UPDATE
 SET
 	nip              = EXCLUDED.nip,
