@@ -148,7 +148,7 @@ CREATE TABLE t_location (
 CREATE TABLE t_harvest (
     id UUID PRIMARY KEY,
     harvest_nbr VARCHAR UNIQUE NOT NULL,
-    harvest_date DATE NOT NULL,
+    harvest_date TIMESTAMP NOT NULL,
  	harvester_id UUID NOT NULL,
  	location_id UUID NOT NULL,
 	tph_id INT4 NOT NULL,
