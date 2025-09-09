@@ -1,15 +1,6 @@
 CREATE DATABASE DB_MASTER;
 
-DROP TABLE IF EXISTS m_foreman_group;
-DROP TABLE IF EXISTS m_employee;
-DROP TABLE IF EXISTS m_tph;
-DROP TABLE IF EXISTS m_block;
-DROP TABLE IF EXISTS m_department;
-DROP TABLE IF EXISTS m_division;
-DROP TABLE IF EXISTS m_estate;
-DROP TABLE IF EXISTS m_operating_unit;
-DROP TABLE IF EXISTS m_company;
-
+DROP TABLE IF EXISTS m_company CASCADE;
 CREATE TABLE m_company (
     id SERIAL PRIMARY KEY,
     code VARCHAR NOT NULL UNIQUE,
@@ -22,6 +13,7 @@ CREATE TABLE m_company (
     write_date TIMESTAMP
 );
 
+DROP TABLE IF EXISTS m_operating_unit CASCADE;
 CREATE TABLE m_operating_unit (
     id SERIAL PRIMARY KEY,
     code VARCHAR NOT NULL UNIQUE,
@@ -36,6 +28,7 @@ CREATE TABLE m_operating_unit (
     CONSTRAINT fk_company FOREIGN KEY (company_id) REFERENCES m_company(id)
 );
 
+DROP TABLE IF EXISTS m_estate CASCADE;
 CREATE TABLE m_estate (
     id SERIAL PRIMARY KEY,
     code VARCHAR NOT NULL UNIQUE,
@@ -55,6 +48,7 @@ CREATE TABLE m_estate (
     CONSTRAINT fk_operating_unit FOREIGN KEY (operating_unit_id) REFERENCES m_operating_unit(id) 
 );
 
+DROP TABLE IF EXISTS m_division CASCADE;
 CREATE TABLE m_division (
     id SERIAL PRIMARY KEY,
     code VARCHAR NOT NULL UNIQUE,
@@ -76,6 +70,7 @@ CREATE TABLE m_division (
     CONSTRAINT fk_parent FOREIGN KEY (parent_id) REFERENCES m_division(id)
 );
 
+DROP TABLE IF EXISTS m_department CASCADE;
 CREATE TABLE m_department (
     id SERIAL PRIMARY KEY,
     code VARCHAR,
@@ -95,6 +90,7 @@ CREATE TABLE m_department (
     CONSTRAINT fk_parent FOREIGN KEY (parent_id) REFERENCES m_department(id)
 );
 
+DROP TABLE IF EXISTS m_block CASCADE;
 CREATE TABLE m_block (
     id SERIAL PRIMARY KEY,
     code VARCHAR NOT NULL UNIQUE,
@@ -130,6 +126,7 @@ CREATE TABLE m_block (
     CONSTRAINT fk_division FOREIGN KEY (division_id) REFERENCES m_division(id)
 );
 
+DROP TABLE IF EXISTS m_tph CASCADE;
 CREATE TABLE m_tph (
     id SERIAL PRIMARY KEY,
     code VARCHAR NOT NULL,
@@ -156,7 +153,7 @@ CREATE TABLE m_tph (
     CONSTRAINT fk_block FOREIGN KEY (block_id) REFERENCES m_block(id)    
 );
 
-
+DROP TABLE IF EXISTS m_employee CASCADE;
 CREATE TABLE m_employee (
 	id SERIAL PRIMARY KEY,
 	nip VARCHAR NOT NULL,
@@ -199,6 +196,7 @@ CREATE TABLE m_employee (
     CONSTRAINT fk_department FOREIGN KEY (department_id) REFERENCES m_department(id)    
 );
 
+DROP TABLE IF EXISTS m_foreman_group CASCADE;
 CREATE TABLE m_foreman_group (
     id SERIAL PRIMARY KEY,
     code VARCHAR NOT NULL UNIQUE,
@@ -226,6 +224,46 @@ CREATE TABLE m_foreman_group (
     CONSTRAINT fk_kerani FOREIGN KEY (kerani_id) REFERENCES m_employee(id),
     CONSTRAINT fk_kerani1 FOREIGN KEY (kerani1_id) REFERENCES m_employee(id),
     CONSTRAINT fk_kerani_panen FOREIGN KEY (kerani_panen_id) REFERENCES m_employee(id)
+);
+
+DROP TABLE IF EXISTS m_equipment CASCADE;
+CREATE TABLE m_equipment (
+	id SERIAL PRIMARY KEY, 
+	code VARCHAR NOT NULL, 
+	name VARCHAR NOT NULL, 
+	asset_id INT4 NOT NULL, 
+	class_id INT4, 
+	class_type VARCHAR, 
+	class_name VARCHAR, 
+	note TEXT,
+	model VARCHAR, 
+	serial_no VARCHAR, 
+	effective_date DATE NOT NULL, 
+	company_id INT4 NOT NULL, 
+	estate_id INT4, 
+	warehouse_id INT4, 
+	cost_center_id INT4, 
+	owning_status_id INT4, 
+	owner_id INT4, 
+	brand_id INT4, 
+	unit_model_id INT4, 
+	machine_class_id INT4, 
+	manufacturing_year VARCHAR, 
+	engine_branch VARCHAR, 
+	acquisition_date DATE, 
+	measuring_type VARCHAR, 
+	hourmeter INT4, 
+	kilometer INT4, 
+	operating_unit_id INT4,
+	is_disabled BOOLEAN DEFAULT FALSE,
+	create_by VARCHAR,
+	create_date TIMESTAMP,
+	write_by VARCHAR,
+	write_date TIMESTAMP,
+	
+    CONSTRAINT fk_company FOREIGN KEY (company_id) REFERENCES m_company(id),
+    CONSTRAINT fk_estate FOREIGN KEY (estate_id) REFERENCES m_estate(id),
+    CONSTRAINT fk_operating_unit FOREIGN KEY (operating_unit_id) REFERENCES m_operating_unit(id) 
 );
 
 -- CREATE ACCESS TO ODOO GBS_PRD
@@ -572,5 +610,61 @@ SET
     write_date        = EXCLUDED.write_date
 ;
 
+-- m_equipment
+UPDATE m_equipment SET is_disabled = TRUE;
+INSERT INTO m_equipment (
+	id, code, name, asset_id, class_id, class_type, class_name, note, model, serial_no, effective_date,
+	company_id, estate_id, warehouse_id, cost_center_id, owning_status_id, owner_id, brand_id, unit_model_id,
+	machine_class_id, manufacturing_year, engine_branch, acquisition_date, measuring_type, hourmeter, 
+	kilometer, operating_unit_id, is_disabled, create_by, create_date, write_by, write_date
+	)
+SELECT
+	a.id, a.name, a.equipment_name, a.asset_id, a.equipment_class_id, c.class_id, c.name, a.note, a.model, a.serial_no, a.effective_date, 
+	b.company_id, b.plantation_estate_id, a.warehouse_id, a.cost_center_id, a.owning_status_id, a.owner_id, a.brand_id, a.unit_model_id, 
+	a.machine_class_id, a.manufacturing_year, a.engine_branch, a.acquisition_date, a.measuring_type, a.hourmeter, 
+  	a.kilometer, NULL, FALSE, x.login, a.create_date, y.login, a.write_date
+  	
+FROM
+	maintenance_equipment a 
+	LEFT JOIN plantation_cost_center b ON b.id = a.cost_center_id 
+	LEFT JOIN maintenance_class_equipment_type c ON c.id = a.equipment_class_id 
+	LEFT JOIN res_users x ON x.id = a.create_uid
+    LEFT JOIN res_users y ON y.id = a.write_uid
+WHERE
+	b.id IS NOT NULL 
+ON CONFLICT (id) DO UPDATE
+SET
+	code = EXCLUDED.code, 
+	name = EXCLUDED.name, 
+	asset_id = EXCLUDED.asset_id, 
+	class_id = EXCLUDED.class_id, 
+	class_type = EXCLUDED.class_type, 
+	class_name = EXCLUDED.class_name, 
+	note = EXCLUDED.note,
+	model = EXCLUDED.model, 
+	serial_no = EXCLUDED.serial_no, 
+	effective_date = EXCLUDED.effective_date, 
+	company_id = EXCLUDED.company_id, 
+	estate_id = EXCLUDED.estate_id, 
+	warehouse_id = EXCLUDED.warehouse_id, 
+	cost_center_id = EXCLUDED.cost_center_id, 
+	owning_status_id = EXCLUDED.owning_status_id, 
+	owner_id = EXCLUDED.owner_id, 
+	brand_id = EXCLUDED.brand_id, 
+	unit_model_id = EXCLUDED.unit_model_id, 
+	machine_class_id = EXCLUDED.machine_class_id, 
+	manufacturing_year = EXCLUDED.manufacturing_year, 
+	engine_branch = EXCLUDED.engine_branch, 
+	acquisition_date = EXCLUDED.acquisition_date, 
+	measuring_type = EXCLUDED.measuring_type, 
+	hourmeter = EXCLUDED.hourmeter, 
+	kilometer = EXCLUDED.kilometer, 
+	operating_unit_id = EXCLUDED.operating_unit_id,
+	is_disabled = FALSE,
+	create_by = EXCLUDED.create_by,
+	create_date = EXCLUDED.create_date,
+	write_by = EXCLUDED.write_by,
+	write_date = EXCLUDED.write_date
+;
 
 
