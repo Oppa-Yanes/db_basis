@@ -69,9 +69,9 @@ CREATE TABLE m_profile (
 	write_date TIMESTAMP    
 );
 
-CREATE TABLE t_rkh (
+CREATE TABLE t_dailyplan (
     id UUID PRIMARY KEY,
-    rkh_date DATE NOT NULL,
+    dailyplan_date DATE NOT NULL,
 	stage CHAR NOT NULL,
 	company_id INT4 NOT NULL,
 	estate_id INT4 NOT NULL,
@@ -87,6 +87,7 @@ CREATE TABLE t_rkh (
  	foreman_job_name VARCHAR NOT NULL,
     profile_id UUID NOT NULL,
     date_sync TIMESTAMP,
+    sync_attempt INT4 NOT NULL DEFAULT 0,
     create_by VARCHAR,
     create_date TIMESTAMP,
     write_by VARCHAR,
@@ -97,7 +98,7 @@ CREATE TABLE t_rkh (
 
 CREATE TABLE t_harvester (
     id UUID PRIMARY KEY,
-	rkh_id UUID NOT NULL,
+	dailyplan_id UUID NOT NULL,
 	emp_id INT4 NOT NULL,
 	nip VARCHAR NOT NULL,
 	name VARCHAR NOT NULL,
@@ -110,18 +111,19 @@ CREATE TABLE t_harvester (
 	foreman_group_name VARCHAR,
     profile_id UUID NOT NULL,
     date_sync TIMESTAMP,
+    sync_attempt INT4 NOT NULL DEFAULT 0,
     create_by VARCHAR,
     create_date TIMESTAMP,
     write_by VARCHAR,
     write_date TIMESTAMP,
     
-    CONSTRAINT fk_rkh FOREIGN KEY (rkh_id) REFERENCES t_rkh(id),
+    CONSTRAINT fk_dailyplan FOREIGN KEY (dailyplan_id) REFERENCES t_dailyplan(id),
     CONSTRAINT fk_profile FOREIGN KEY (profile_id) REFERENCES m_profile(id)
 );
 
 CREATE TABLE t_location (
     id UUID PRIMARY KEY,
-	rkh_id UUID NOT NULL,
+	dailyplan_id UUID NOT NULL,
 	block_id INT4 NOT NULL,
 	block_code VARCHAR NOT NULL,
 	harvest_area NUMERIC(8,2),
@@ -131,12 +133,13 @@ CREATE TABLE t_location (
 	est_output NUMERIC(8,2),
     profile_id UUID NOT NULL,
     date_sync TIMESTAMP,
+    sync_attempt INT4 NOT NULL DEFAULT 0,
     create_by VARCHAR,
     create_date TIMESTAMP,
     write_by VARCHAR,
     write_date TIMESTAMP,
     
-    CONSTRAINT fk_rkh FOREIGN KEY (rkh_id) REFERENCES t_rkh(id),
+    CONSTRAINT fk_dailyplan FOREIGN KEY (dailyplan_id) REFERENCES t_dailyplan(id),
     CONSTRAINT fk_profile FOREIGN KEY (profile_id) REFERENCES m_profile(id)
 );
 
@@ -153,10 +156,14 @@ CREATE TABLE t_harvest (
 	overripe_qty INT4 NOT NULL DEFAULT 0,
 	rotten_qty INT4 NOT NULL DEFAULT 0,
 	empty_bunch_qty INT4 NOT NULL DEFAULT 0,
+	loose_fruit_qty NUMERIC(8,2) NOT NULL DEFAULT 0,
 	pic_path VARCHAR NOT NULL,
-	pic_uri VARCHAR NOT NULL,	
+	pic_uri VARCHAR NOT NULL,
+	rfid_id VARCHAR,
+	rfid_text VARCHAR,
  	profile_id UUID NOT NULL,
     date_sync TIMESTAMP,
+    sync_attempt INT4 NOT NULL DEFAULT 0,
     create_by VARCHAR,
     create_date TIMESTAMP,
     write_by VARCHAR,
@@ -165,6 +172,8 @@ CREATE TABLE t_harvest (
     CONSTRAINT fk_harvester FOREIGN KEY (harvester_id) REFERENCES t_harvester(id),
     CONSTRAINT fk_profile FOREIGN KEY (profile_id) REFERENCES m_profile(id)
 );
+
+
 
 -- IMPORT DATA
 
