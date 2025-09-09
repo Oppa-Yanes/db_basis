@@ -71,6 +71,7 @@ CREATE TABLE m_profile (
 
 CREATE TABLE t_dailyplan (
     id UUID PRIMARY KEY,
+    dailyplan_nbr VARCHAR UNIQUE NOT NULL,
     dailyplan_date DATE NOT NULL,
 	stage CHAR NOT NULL,
 	company_id INT4 NOT NULL,
@@ -101,6 +102,7 @@ CREATE TABLE t_harvester (
 	dailyplan_id UUID NOT NULL,
 	emp_id INT4 NOT NULL,
 	nip VARCHAR NOT NULL,
+	fp_id VARCHAR NOT NULL,
 	name VARCHAR NOT NULL,
 	job_level_id INT4 NOT NULL,
  	job_level_name VARCHAR,
@@ -145,6 +147,7 @@ CREATE TABLE t_location (
 
 CREATE TABLE t_harvest (
     id UUID PRIMARY KEY,
+    harvest_nbr VARCHAR UNIQUE NOT NULL,
     harvest_date DATE NOT NULL,
  	harvester_id UUID NOT NULL,
 	tph_id INT4 NOT NULL,
@@ -172,7 +175,6 @@ CREATE TABLE t_harvest (
     CONSTRAINT fk_harvester FOREIGN KEY (harvester_id) REFERENCES t_harvester(id),
     CONSTRAINT fk_profile FOREIGN KEY (profile_id) REFERENCES m_profile(id)
 );
-
 
 
 -- IMPORT DATA
