@@ -24,6 +24,7 @@ INTO public;
 
 -- MAIN TABLES
 
+DROP TABLE IF EXISTS t_taksasi CASCADE;
 CREATE TABLE t_taksasi (
 	id SERIAL PRIMARY KEY,
     code VARCHAR NOT NULL,
@@ -47,6 +48,7 @@ CREATE TABLE t_taksasi (
     write_date TIMESTAMP
 );
 
+DROP TABLE IF EXISTS m_profile CASCADE;
 CREATE TABLE m_profile (
 	id UUID PRIMARY KEY,
 	emp_id INT4 NOT NULL,
@@ -69,10 +71,40 @@ CREATE TABLE m_profile (
 	write_date TIMESTAMP    
 );
 
-CREATE TABLE t_dailyplan (
+DROP TABLE IF EXISTS t_transport CASCADE;
+CREATE TABLE t_transport (
     id UUID PRIMARY KEY,
-    dailyplan_nbr VARCHAR UNIQUE NOT NULL,
-    dailyplan_date DATE NOT NULL,
+    transport_nbr VARCHAR UNIQUE NOT NULL,
+    transport_date TIMESTAMP NOT NULL,
+	company_id INT4 NOT NULL,
+	estate_id INT4 NOT NULL,
+	division_id INT4 NOT NULL,
+	equipment_id INT4 NOT NULL,
+	driver_id INT4 NOT NULL,
+	loader_id INT4 NOT NULL,
+	total_bunch INT4 NOT NULL DEFAULT 0,
+	total_loose_fruit NUMERIC(8,2) NOT NULL DEFAULT 0,
+	total_weight NUMERIC(8,2) NOT NULL DEFAULT 0,
+ 	pic_path VARCHAR NOT NULL,
+	pic_uri VARCHAR NOT NULL,
+	rfid_id VARCHAR,
+	rfid_text VARCHAR,
+	profile_id UUID NOT NULL,
+    date_sync TIMESTAMP,
+    sync_attempt INT4 NOT NULL DEFAULT 0,
+    create_by VARCHAR,
+    create_date TIMESTAMP,
+    write_by VARCHAR,
+    write_date TIMESTAMP,
+    
+    CONSTRAINT fk_profile FOREIGN KEY (profile_id) REFERENCES m_profile(id)
+);
+
+DROP TABLE IF EXISTS t_rkh CASCADE;
+CREATE TABLE t_rkh (
+    id UUID PRIMARY KEY,
+    rkh_nbr VARCHAR UNIQUE NOT NULL,
+    rkh_date DATE NOT NULL,
 	stage CHAR NOT NULL,
 	company_id INT4 NOT NULL,
 	estate_id INT4 NOT NULL,
@@ -97,9 +129,10 @@ CREATE TABLE t_dailyplan (
     CONSTRAINT fk_profile FOREIGN KEY (profile_id) REFERENCES m_profile(id)
 );
 
+DROP TABLE IF EXISTS t_harvester CASCADE;
 CREATE TABLE t_harvester (
     id UUID PRIMARY KEY,
-	dailyplan_id UUID NOT NULL,
+	rkh_id UUID NOT NULL,
 	emp_id INT4 NOT NULL,
 	nip VARCHAR NOT NULL,
 	fp_id VARCHAR NOT NULL,
@@ -119,20 +152,21 @@ CREATE TABLE t_harvester (
     write_by VARCHAR,
     write_date TIMESTAMP,
     
-    CONSTRAINT fk_dailyplan FOREIGN KEY (dailyplan_id) REFERENCES t_dailyplan(id),
+    CONSTRAINT fk_rkh FOREIGN KEY (rkh_id) REFERENCES t_rkh(id),
     CONSTRAINT fk_profile FOREIGN KEY (profile_id) REFERENCES m_profile(id)
 );
 
+DROP TABLE IF EXISTS t_location CASCADE;
 CREATE TABLE t_location (
     id UUID PRIMARY KEY,
-	dailyplan_id UUID NOT NULL,
+	rkh_id UUID NOT NULL,
 	block_id INT4 NOT NULL,
 	block_code VARCHAR NOT NULL,
-	harvest_area NUMERIC(8,2),
-	est_weight NUMERIC(8,2),
-	est_bunch INT4,
-	est_hk NUMERIC(8,2),
-	est_output NUMERIC(8,2),
+	harvest_area NUMERIC(8,2) NOT NULL DEFAULT 0,
+	est_weight NUMERIC(8,2) NOT NULL DEFAULT 0,
+	est_bunch INT4 NOT NULL DEFAULT 0,
+	est_hk NUMERIC(8,2) NOT NULL DEFAULT 0,
+	est_output NUMERIC(8,2) NOT NULL DEFAULT 0,
     profile_id UUID NOT NULL,
     date_sync TIMESTAMP,
     sync_attempt INT4 NOT NULL DEFAULT 0,
@@ -141,10 +175,11 @@ CREATE TABLE t_location (
     write_by VARCHAR,
     write_date TIMESTAMP,
     
-    CONSTRAINT fk_dailyplan FOREIGN KEY (dailyplan_id) REFERENCES t_dailyplan(id),
+    CONSTRAINT fk_rkh FOREIGN KEY (rkh_id) REFERENCES t_rkh(id),
     CONSTRAINT fk_profile FOREIGN KEY (profile_id) REFERENCES m_profile(id)
 );
 
+DROP TABLE IF EXISTS t_harvest CASCADE;
 CREATE TABLE t_harvest (
     id UUID PRIMARY KEY,
     harvest_nbr VARCHAR UNIQUE NOT NULL,
@@ -165,6 +200,7 @@ CREATE TABLE t_harvest (
 	pic_uri VARCHAR NOT NULL,
 	rfid_id VARCHAR,
 	rfid_text VARCHAR,
+	transport_id UUID,
  	profile_id UUID NOT NULL,
     date_sync TIMESTAMP,
     sync_attempt INT4 NOT NULL DEFAULT 0,
@@ -173,10 +209,36 @@ CREATE TABLE t_harvest (
     write_by VARCHAR,
     write_date TIMESTAMP,
     
+    CONSTRAINT fk_transport FOREIGN KEY (transport_id) REFERENCES t_transport(id),
     CONSTRAINT fk_harvester FOREIGN KEY (harvester_id) REFERENCES t_harvester(id),
     CONSTRAINT fk_profile FOREIGN KEY (profile_id) REFERENCES m_profile(id)
 );
 
+DROP TABLE IF EXISTS t_bkm CASCADE;
+CREATE TABLE t_bkm (
+    id UUID PRIMARY KEY,
+	rkh_id UUID NOT NULL,
+	harvester_id UUID UNIQUE NOT NULL,
+	ha_amt NUMERIC(8,2) NOT NULL DEFAULT 0,
+	p01 NUMERIC(8,2) NOT NULL DEFAULT 0,
+	p02 NUMERIC(8,2) NOT NULL DEFAULT 0,
+	p03 NUMERIC(8,2) NOT NULL DEFAULT 0,
+	p04 NUMERIC(8,2) NOT NULL DEFAULT 0,
+	p05 NUMERIC(8,2) NOT NULL DEFAULT 0,
+	p06 NUMERIC(8,2) NOT NULL DEFAULT 0,
+	p07 NUMERIC(8,2) NOT NULL DEFAULT 0,	
+	profile_id UUID NOT NULL,
+    date_sync TIMESTAMP,
+    sync_attempt INT4 NOT NULL DEFAULT 0,
+    create_by VARCHAR,
+    create_date TIMESTAMP,
+    write_by VARCHAR,
+    write_date TIMESTAMP,
+    
+    CONSTRAINT fk_rkh FOREIGN KEY (rkh_id) REFERENCES t_rkh(id),
+    CONSTRAINT fk_harvester FOREIGN KEY (harvester_id) REFERENCES t_harvester(id),
+    CONSTRAINT fk_profile FOREIGN KEY (profile_id) REFERENCES m_profile(id)
+);
 
 -- IMPORT DATA
 
