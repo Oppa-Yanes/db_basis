@@ -4,6 +4,7 @@ CREATE TABLE t_akp (
     akp_nbr VARCHAR UNIQUE NOT NULL,
     akp_date TIMESTAMP NOT NULL,
 	harvest_date DATE NOT NULL,
+	stage char NOT NULL DEFAULT 'D',
 	company_id SERIAL4 NOT NULL,
 	estate_id SERIAL4 NOT NULL,
 	division_id SERIAL4 NOT NULL,
