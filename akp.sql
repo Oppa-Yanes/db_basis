@@ -9,7 +9,6 @@ CREATE TABLE t_akp (
 	estate_id SERIAL4 NOT NULL,
 	division_id SERIAL4 NOT NULL,
     block_id SERIAL4 NOT NULL,
-	baris_nbr INT4 NOT NULL DEFAULT 0,
     total_bunch_count INT4 NOT NULL DEFAULT 0,
     total_plant NUMERIC(8,2) NOT NULL DEFAULT 0,
     akp NUMERIC(8,2) NOT NULL DEFAULT 0,
@@ -32,7 +31,8 @@ CREATE TABLE t_akp (
 DROP TABLE IF EXISTS t_akp_line CASCADE;
 CREATE TABLE t_akp_line (
     id UUID PRIMARY KEY,
-    akp UUID NOT NULL,
+    akp_id UUID NOT NULL,
+	baris_nbr INT4 NOT NULL DEFAULT 0,
 	pokok_nbr INT4 NOT NULL DEFAULT 0,
 	bunch_count INT4 NOT NULL DEFAULT 0,
     date_sync TIMESTAMP,
