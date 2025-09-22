@@ -49,6 +49,8 @@ CREATE TABLE t_akp_point (
     akp_line_id UUID NOT NULL,
 	pokok_nbr INT4 NOT NULL DEFAULT 0,
 	bunch_count INT4 NOT NULL DEFAULT 0,
+	lat FLOAT NOT NULL DEFAULT 0,
+    long FLOAT NOT NULL DEFAULT 0,
     date_sync TIMESTAMP,
     create_by VARCHAR,
     create_date TIMESTAMP,
