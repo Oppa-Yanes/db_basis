@@ -293,10 +293,10 @@ CREATE TABLE m_premi_rule (
 	operating_unit_id INT4 NOT NULL,
 	company_id INT4 NOT NULL,	
 	is_disabled BOOLEAN DEFAULT FALSE,
-	create_uid int4 NULL,
-	create_date timestamp NULL,
-	write_uid int4 NULL,
-	write_date timestamp NULL
+    create_by VARCHAR,
+    create_date TIMESTAMP,
+    write_by VARCHAR,
+    write_date TIMESTAMP
 );
 
 -- CREATE ACCESS TO ODOO GBS_PRD
@@ -725,6 +725,42 @@ SET
     weight = EXCLUDED.weight,
     bunches_qty = EXCLUDED.bunches_qty,
     bjr = EXCLUDED.bjr,
+    is_disabled = FALSE,
+    create_by = EXCLUDED.create_by,
+    create_date = EXCLUDED.create_date,
+    write_by = EXCLUDED.write_by,
+    write_date = EXCLUDED.write_date
+;
+
+-- m_premi_rule
+UPDATE m_premi_rule SET is_disabled = TRUE;
+INSERT INTO m_premi_rule (id, name, date, premi_loose_rate, premi_loose_rate2, premi_doublebase_rate, additional_base_rate, operating_unit_id, company_id, is_disabled, create_by, create_date, write_by, write_date)
+SELECT
+	a.id,
+	a.name,
+	a.date,
+	a.premi_ffb_loose_rate,
+	a.premi_ffb_loose_rate_2,
+	a.premi_double_base_achieved_rate,
+	a.additional_base_for_panen_without_loose,
+	a.operating_unit_id,
+	a.company_id,
+	FALSE, x.login, a.create_date, y.login, a.write_date
+FROM
+	plantation_harvest_premi_rule a
+    LEFT JOIN res_users x ON x.id = a.create_uid
+    LEFT JOIN res_users y ON y.id = a.write_uid
+WHERE a.active
+ON CONFLICT (id) DO UPDATE
+SET
+    name = EXCLUDED.name,
+    date = EXCLUDED.date,
+    premi_loose_rate = EXCLUDED.premi_loose_rate,
+    premi_loose_rate2 = EXCLUDED.premi_loose_rate2,
+    premi_doublebase_rate = EXCLUDED.premi_doublebase_rate,
+    additional_base_rate = EXCLUDED.additional_base_rate,
+    operating_unit_id = EXCLUDED.operating_unit_id,
+    company_id = EXCLUDED.company_id,
     is_disabled = FALSE,
     create_by = EXCLUDED.create_by,
     create_date = EXCLUDED.create_date,
