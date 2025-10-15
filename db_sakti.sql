@@ -26,7 +26,7 @@ INTO public;
 
 DROP TABLE IF EXISTS t_taksasi CASCADE;
 CREATE TABLE t_taksasi (
-	id SERIAL PRIMARY KEY,
+	id UUID PRIMARY KEY,
     code VARCHAR NOT NULL,
 	census_date DATE NOT NULL,
 	harvest_date DATE NOT NULL,
