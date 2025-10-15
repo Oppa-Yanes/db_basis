@@ -684,4 +684,34 @@ SET
 	write_date = EXCLUDED.write_date
 ;
 
+-- m_bjr
+UPDATE m_bjr SET is_disabled = TRUE;
+INSERT INTO m_bjr (id, block_id, period, weight, bunches_qty, bjr, is_disabled, create_by, create_date, write_by, write_date)
+SELECT
+	a.id,
+	a.planted_block_id,
+	b.tahun_kalkulasi || RIGHT('00' || b.periode_kalkulasi,2) period,
+	a.delivered_bunches_est_weight weight,
+	a.delivered_bunches_qty bunches_qty,
+	a.new_avg_weight_ffb bjr,
+	FALSE, x.login, a.create_date, y.login, a.write_date
+FROM
+	plantation_batch_average_ffb_line a
+	LEFT JOIN plantation_batch_average_ffb b ON b.id = a.batch_id  
+    LEFT JOIN res_users x ON x.id = a.create_uid
+    LEFT JOIN res_users y ON y.id = a.write_uid
+ON CONFLICT (id) DO UPDATE
+SET
+    block_id = EXCLUDED.block_id,
+    period = EXCLUDED.period,
+    weight = EXCLUDED.weight,
+    bunches_qty = EXCLUDED.bunches_qty,
+    bjr = EXCLUDED.bjr,
+    is_disabled = FALSE,
+    create_by = EXCLUDED.create_by,
+    create_date = EXCLUDED.create_date,
+    write_by = EXCLUDED.write_by,
+    write_date = EXCLUDED.write_date
+;
+
 
