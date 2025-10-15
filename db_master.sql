@@ -789,4 +789,41 @@ SET
     write_date = EXCLUDED.write_date
 ;
 
+-- m_premi_rate
+UPDATE m_premi_rate SET is_disabled = TRUE;
+INSERT INTO m_premi_rate (id, rule_id, range_from, range_to, base_weight, rate1, rate2, rate3, loose_rate1, loose_rate2, is_disabled, create_by, create_date, write_by, write_date)
+SELECT
+	a.id,
+	a.rule_id,
+	a.avg_ffb_range_from,
+	a.avg_ffb_range_to,
+	a.base_weight,
+	a.rate_1,
+	a.rate_2,
+	a.rate_3,
+	a.loose_rate_1,
+	a.loose_rate_2,
+	FALSE, x.login, a.create_date, y.login, a.write_date
+FROM
+	plantation_harvest_premi_rate a
+    LEFT JOIN res_users x ON x.id = a.create_uid
+    LEFT JOIN res_users y ON y.id = a.write_uid
+ON CONFLICT (id) DO UPDATE
+SET
+    rule_id = EXCLUDED.rule_id,
+    range_from = EXCLUDED.range_from,
+    range_to = EXCLUDED.range_to,
+    base_weight = EXCLUDED.base_weight,
+    rate1 = EXCLUDED.rate1,
+    rate2 = EXCLUDED.rate2,
+    rate3 = EXCLUDED.rate3,
+    loose_rate1 = EXCLUDED.loose_rate1,
+    loose_rate2 = EXCLUDED.loose_rate2,
+    is_disabled = FALSE,
+    create_by = EXCLUDED.create_by,
+    create_date = EXCLUDED.create_date,
+    write_by = EXCLUDED.write_by,
+    write_date = EXCLUDED.write_date
+;
+
 
