@@ -583,10 +583,12 @@ SET
 -- foreman group
 UPDATE m_foreman_group SET is_disabled = TRUE;
 INSERT INTO m_foreman_group (id, code, name, type, foreman_id, foreman1_id, kerani_id, kerani1_id, kerani_panen_id, operating_unit_id, company_id, division_id, is_disabled, create_by, create_date, write_by, write_date)
-SELECT a.id, a.code, a.name, a.type, a.foreman_id, a.foreman1_id, a.kerani_id, a.kerani1_id, a.kerani_harvest_id, a.operating_unit_id, a.company_id, b.division_id, FALSE, x.login, a.create_date, y.login, a.write_date
+SELECT a.id, a.code, a.name, a.type, CASE WHEN c.id IS NULL THEN NULL ELSE a.foreman_id END, CASE WHEN d.id IS NULL THEN NULL ELSE a.foreman1_id END, a.kerani_id, a.kerani1_id, a.kerani_harvest_id, a.operating_unit_id, a.company_id, b.division_id, FALSE, x.login, a.create_date, y.login, a.write_date
 FROM
     hr_foreman_group a
     LEFT JOIN hr_department b ON b.id = a.department_id
+    LEFT JOIN hr_employee c ON c.id = a.foreman_id AND c.active
+    LEFT JOIN hr_employee d ON d.id = a.foreman1_id AND d.active
     LEFT JOIN res_users x ON x.id = a.create_uid
     LEFT JOIN res_users y ON y.id = a.write_uid
 WHERE a.active 
