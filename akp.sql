@@ -9,6 +9,10 @@ CREATE TABLE t_akp (
 	estate_id SERIAL4 NOT NULL,
 	division_id SERIAL4 NOT NULL,
     block_id SERIAL4 NOT NULL,
+	company_odooid SERIAL4 NOT NULL,
+	estate_odooid SERIAL4 NOT NULL,
+	division_odooid SERIAL4 NOT NULL,
+    block_odooid SERIAL4 NOT NULL,
     total_bunch_count INT4 NOT NULL DEFAULT 0,
     total_plant NUMERIC(8,2) NOT NULL DEFAULT 0,
     akp NUMERIC(8,2) NOT NULL DEFAULT 0,
@@ -17,13 +21,7 @@ CREATE TABLE t_akp (
     create_by VARCHAR,
     create_date TIMESTAMP,
     write_by VARCHAR,
-    write_date TIMESTAMP,
-
-    CONSTRAINT fk_company FOREIGN KEY (company_id) REFERENCES company(id),
-    CONSTRAINT fk_estate FOREIGN KEY (estate_id) REFERENCES estate(id),
-    CONSTRAINT fk_division FOREIGN KEY (division_id) REFERENCES divisi(id),
-    CONSTRAINT fk_block FOREIGN KEY (block_id) REFERENCES blok(id),
-    CONSTRAINT fk_users FOREIGN KEY (user_uuid) REFERENCES users(uuid)
+    write_date TIMESTAMP
 );
 
 DROP TABLE IF EXISTS t_akp_line CASCADE;
