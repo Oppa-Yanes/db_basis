@@ -266,6 +266,21 @@ CREATE TABLE m_equipment (
     CONSTRAINT fk_operating_unit FOREIGN KEY (operating_unit_id) REFERENCES m_operating_unit(id) 
 );
 
+DROP TABLE IF EXISTS m_bjr CASCADE;
+CREATE TABLE m_bjr (
+    id SERIAL PRIMARY KEY,
+    block_id INT4 NOT NULL,
+    period VARCHAR NOT NULL,
+    weight NUMERIC(8,2) DEFAULT 0,
+    bunches_qty INT4 NOT NULL DEFAULT 0,
+    bjr NUMERIC(8,2) DEFAULT 0,
+    is_disabled BOOLEAN DEFAULT FALSE,
+    create_by VARCHAR,
+    create_date TIMESTAMP,
+    write_by VARCHAR,
+    write_date TIMESTAMP
+);
+
 -- CREATE ACCESS TO ODOO GBS_PRD
 
 CREATE EXTENSION IF NOT EXISTS postgres_fdw;
