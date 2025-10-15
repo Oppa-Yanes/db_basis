@@ -299,6 +299,27 @@ CREATE TABLE m_premi_rule (
     write_date TIMESTAMP
 );
 
+DROP TABLE IF EXISTS m_premi_rate CASCADE;
+CREATE TABLE m_premi_rate (
+	id SERIAL PRIMARY KEY,
+	rule_id INT4 NOT NULL,
+	range_from NUMERIC(8,2) NOT NULL,
+	range_to NUMERIC(8,2) NOT NULL,
+	base_weight INT4 DEFAULT 0,
+	rate1 INT4 DEFAULT 0,
+	rate2 INT4 DEFAULT 0,
+	rate3 INT4 DEFAULT 0,
+	loose_rate1 INT4 DEFAULT 0,
+	loose_rate2 INT4 DEFAULT 0,
+	is_disabled BOOLEAN DEFAULT FALSE,
+    create_by VARCHAR,
+    create_date TIMESTAMP,
+    write_by VARCHAR,
+    write_date TIMESTAMP,
+    
+	CONSTRAINT fk_premi_rule FOREIGN KEY (rule_id) REFERENCES m_premi_rule(id)
+);
+
 -- CREATE ACCESS TO ODOO GBS_PRD
 
 CREATE EXTENSION IF NOT EXISTS postgres_fdw;
