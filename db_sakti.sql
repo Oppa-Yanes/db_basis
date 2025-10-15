@@ -34,7 +34,6 @@ CREATE TABLE t_taksasi (
 	estate_id INT4 NOT NULL,
 	division_id INT4 NOT NULL,	
 	block_id INT4 NOT NULL,
-	foreman_id INT4 NOT NULL,
 	harvest_area NUMERIC(8,2),
 	est_weight NUMERIC(8,2),
 	est_ripe_bunch INT4,
@@ -244,12 +243,12 @@ CREATE TABLE t_bkm (
 
 UPDATE t_taksasi SET is_disabled = TRUE;
 INSERT INTO t_taksasi (
-	id, code, census_date, harvest_date, company_id, estate_id, division_id, block_id, foreman_id,
+	id, code, census_date, harvest_date, company_id, estate_id, division_id, block_id, 
 	harvest_area, est_weight, est_ripe_bunch, est_hk, est_output, state,
 	is_disabled, create_by, create_date, write_by, write_date
 	)
 SELECT
-	a.id, a.name, a.taksasi_date, a.tanggal_rencana_panen, b.company_id, a.plantation_estate_id, a.division_id, a.block_land, a.foreman_id,
+	a.id, a.name, a.taksasi_date, a.tanggal_rencana_panen, b.company_id, a.plantation_estate_id, a.division_id, a.block_land, 
 	a.total_luas_panen, a.total_taksasi_panen, a.total_jumlah_janjang_masak, a.total_hk, a.jumlah_kghk, a.state,
 	FALSE, x.login, a.create_date, y.login, a.write_date
 FROM
@@ -266,7 +265,6 @@ SET
     estate_id = EXCLUDED.estate_id,
     division_id = EXCLUDED.division_id,
     block_id = EXCLUDED.block_id,
-    foreman_id = EXCLUDED.foreman_id,
     harvest_area = EXCLUDED.harvest_area,
     est_weight = EXCLUDED.est_weight,
     est_ripe_bunch = EXCLUDED.est_ripe_bunch,
