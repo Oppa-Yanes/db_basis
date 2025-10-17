@@ -44,7 +44,9 @@ CREATE TABLE t_taksasi (
     create_by VARCHAR,
     create_date TIMESTAMP,
     write_by VARCHAR,
-    write_date TIMESTAMP
+    write_date TIMESTAMP,
+    
+    UNIQUE (harvest_date, block_id)
 );
 
 DROP TABLE IF EXISTS m_profile CASCADE;
@@ -276,6 +278,69 @@ SET
     create_date = EXCLUDED.create_date,
     write_by = EXCLUDED.write_by,
     write_date = EXCLUDED.write_date
+;
+
+WITH akp_point AS (
+	SELECT
+		akp_point.akp_line_id, SUM(akp_point.bunch_count) bunch_count, SUM(CASE WHEN akp_point.is_dead THEN 1 ELSE 0 END) is_dead
+	FROM
+		t_akp_point akp_point
+	GROUP BY
+		akp_point.akp_line_id
+),
+premi_rate AS (
+	SELECT 
+		rule.operating_unit_id, rule.company_id, rate.range_from, rate.range_to, rate.base_weight,
+		rate.rate1, rate.rate2, rate.rate3, rate.loose_rate1, rate.loose_rate2,
+		rule.premi_loose_rate, rule.premi_loose_rate2, rule.premi_doublebase_rate, rule.additional_base_rate
+	FROM
+		m_premi_rate rate
+		LEFT JOIN m_premi_rule rule ON rule.id = rate.rule_id 
+	WHERE
+		NOT rule.is_disabled
+)
+INSERT INTO t_taksasi (
+	id, harvest_date, company_id, estate_id, division_id, block_id, planted_area, plant_total, bjr, base_weight, akp,
+	est_ripe_bunch, est_weight, est_hk, est_output, create_by, create_date, write_by, write_date
+)
+SELECT 
+	gen_random_uuid() id,
+	akp.harvest_date,
+	akp.company_odooid company_id,
+	akp.estate_odooid estate_id,
+	akp.division_odooid division_id,
+	akp.block_odooid block_id,
+	block.planted_area,
+	block.plant_total,
+	bjr.bjr,
+	rate.base_weight,
+	SUM(akp_point.bunch_count) / (SUM(akp_line.total_plant) - SUM(akp_point.is_dead)) akp,
+	SUM(akp_point.bunch_count) / (SUM(akp_line.total_plant) - SUM(akp_point.is_dead)) * block.plant_total est_ripe_bunch,
+	SUM(akp_point.bunch_count) / (SUM(akp_line.total_plant) - SUM(akp_point.is_dead)) * block.plant_total * bjr.bjr est_weight,
+	(SUM(akp_point.bunch_count) / (SUM(akp_line.total_plant) - SUM(akp_point.is_dead)) * block.plant_total * bjr.bjr) / rate.base_weight est_hk,
+	(SUM(akp_point.bunch_count) / (SUM(akp_line.total_plant) - SUM(akp_point.is_dead)) * block.plant_total * bjr.bjr) 
+		/ ((SUM(akp_point.bunch_count) / (SUM(akp_line.total_plant) - SUM(akp_point.is_dead)) * block.plant_total * bjr.bjr) / rate.base_weight) est_output,
+	'admin', CURRENT_DATE, 'admin', CURRENT_DATE
+FROM
+	t_akp akp
+	LEFT JOIN t_akp_line akp_line ON akp_line.akp_id = akp.id 
+	LEFT JOIN m_block block ON block.id = akp.block_odooid 
+	LEFT JOIN akp_point ON akp_point.akp_line_id = akp_line.id 
+	LEFT JOIN m_bjr bjr ON bjr.period = to_char(akp.harvest_date - interval '1 month', 'YYYYMM') AND bjr.block_id = akp.block_odooid
+	LEFT JOIN premi_rate rate ON bjr.bjr BETWEEN rate.range_from AND rate.range_to AND rate.company_id = akp.company_id 
+WHERE 
+	akp.harvest_date = '2025-10-17'
+	AND akp.block_odooid = 1048
+GROUP BY
+	akp.harvest_date,
+	akp.company_odooid,
+	akp.estate_odooid,
+	akp.division_odooid,
+	akp.block_odooid,
+	block.planted_area,
+	block.plant_total,
+	bjr.bjr,
+	rate.base_weight
 ;
 
 
