@@ -2,7 +2,7 @@ CREATE DATABASE DB_MASTER;
 
 DROP TABLE IF EXISTS m_company CASCADE;
 CREATE TABLE m_company (
-    id SERIAL PRIMARY KEY,
+    id INT4 PRIMARY KEY,
     code VARCHAR NOT NULL UNIQUE,
     init VARCHAR,
     name VARCHAR NOT NULL,
@@ -15,7 +15,7 @@ CREATE TABLE m_company (
 
 DROP TABLE IF EXISTS m_operating_unit CASCADE;
 CREATE TABLE m_operating_unit (
-    id SERIAL PRIMARY KEY,
+    id INT4 PRIMARY KEY,
     code VARCHAR NOT NULL UNIQUE,
     name VARCHAR NOT NULL,
     company_id INT4 NOT NULL,
@@ -30,7 +30,7 @@ CREATE TABLE m_operating_unit (
 
 DROP TABLE IF EXISTS m_estate CASCADE;
 CREATE TABLE m_estate (
-    id SERIAL PRIMARY KEY,
+    id INT4 PRIMARY KEY,
     code VARCHAR NOT NULL UNIQUE,
     name VARCHAR NOT NULL,
     mark VARCHAR,
@@ -50,7 +50,7 @@ CREATE TABLE m_estate (
 
 DROP TABLE IF EXISTS m_division CASCADE;
 CREATE TABLE m_division (
-    id SERIAL PRIMARY KEY,
+    id INT4 PRIMARY KEY,
     code VARCHAR NOT NULL UNIQUE,
     name VARCHAR NOT NULL,
     mark VARCHAR,
@@ -72,7 +72,7 @@ CREATE TABLE m_division (
 
 DROP TABLE IF EXISTS m_department CASCADE;
 CREATE TABLE m_department (
-    id SERIAL PRIMARY KEY,
+    id INT4 PRIMARY KEY,
     code VARCHAR,
     name VARCHAR NOT NULL,
     complete_name VARCHAR NOT NULL,
@@ -92,7 +92,7 @@ CREATE TABLE m_department (
 
 DROP TABLE IF EXISTS m_block CASCADE;
 CREATE TABLE m_block (
-    id SERIAL PRIMARY KEY,
+    id INT4 PRIMARY KEY,
     code VARCHAR NOT NULL UNIQUE,
     code2 VARCHAR NOT NULL,
     name VARCHAR NOT NULL,
@@ -128,7 +128,7 @@ CREATE TABLE m_block (
 
 DROP TABLE IF EXISTS m_tph CASCADE;
 CREATE TABLE m_tph (
-    id SERIAL PRIMARY KEY,
+    id INT4 PRIMARY KEY,
     code VARCHAR NOT NULL,
     name VARCHAR NOT NULL,
     lat FLOAT NOT NULL DEFAULT 0.0,
@@ -155,7 +155,7 @@ CREATE TABLE m_tph (
 
 DROP TABLE IF EXISTS m_employee CASCADE;
 CREATE TABLE m_employee (
-	id SERIAL PRIMARY KEY,
+	id INT4 PRIMARY KEY,
 	nip VARCHAR NOT NULL,
 	name VARCHAR NOT NULL,
 	operating_unit_id INT4,
@@ -198,7 +198,7 @@ CREATE TABLE m_employee (
 
 DROP TABLE IF EXISTS m_foreman_group CASCADE;
 CREATE TABLE m_foreman_group (
-    id SERIAL PRIMARY KEY,
+    id INT4 PRIMARY KEY,
     code VARCHAR NOT NULL UNIQUE,
     name VARCHAR NOT NULL,
     type VARCHAR NOT NULL,
@@ -228,7 +228,7 @@ CREATE TABLE m_foreman_group (
 
 DROP TABLE IF EXISTS m_equipment CASCADE;
 CREATE TABLE m_equipment (
-	id SERIAL PRIMARY KEY, 
+	id INT4 PRIMARY KEY, 
 	code VARCHAR NOT NULL, 
 	name VARCHAR NOT NULL, 
 	asset_id INT4 NOT NULL, 
@@ -268,7 +268,7 @@ CREATE TABLE m_equipment (
 
 DROP TABLE IF EXISTS m_bjr CASCADE;
 CREATE TABLE m_bjr (
-    id SERIAL PRIMARY KEY,
+    id INT4 PRIMARY KEY,
     block_id INT4 NOT NULL,
     period VARCHAR NOT NULL,
     weight NUMERIC(8,2) DEFAULT 0,
@@ -283,7 +283,7 @@ CREATE TABLE m_bjr (
 
 DROP TABLE IF EXISTS m_premi_rule CASCADE;
 CREATE TABLE m_premi_rule (
-	id SERIAL PRIMARY KEY,
+	id INT4 PRIMARY KEY,
 	name VARCHAR NOT NULL,
 	date DATE,
 	premi_loose_rate INT4 DEFAULT 0,
@@ -301,7 +301,7 @@ CREATE TABLE m_premi_rule (
 
 DROP TABLE IF EXISTS m_premi_rate CASCADE;
 CREATE TABLE m_premi_rate (
-	id SERIAL PRIMARY KEY,
+	id INT4 PRIMARY KEY,
 	rule_id INT4 NOT NULL,
 	range_from NUMERIC(8,2) NOT NULL,
 	range_to NUMERIC(8,2) NOT NULL,
