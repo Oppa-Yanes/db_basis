@@ -329,8 +329,8 @@ FROM
 	LEFT JOIN m_bjr bjr ON bjr.period = to_char(akp.harvest_date - interval '1 month', 'YYYYMM') AND bjr.block_id = akp.block_odooid
 	LEFT JOIN premi_rate rate ON bjr.bjr BETWEEN rate.range_from AND rate.range_to AND rate.company_id = akp.company_id 
 WHERE 
-	akp.harvest_date = '2025-10-17'
-	AND akp.block_odooid = 1048
+	akp.harvest_date = :harvest_date
+	AND akp.block_odooid = :block_id
 GROUP BY
 	akp.harvest_date,
 	akp.company_odooid,
